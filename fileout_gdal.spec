@@ -1,24 +1,24 @@
-Summary: Return a NetCDF File for a DAP Data response
-Name: fileout_netcdf
-Version: 1.1.3
+Summary: Return a GeoTiff, JP2k, etc., File for a DAP Data response
+Name: fileout_gdal
+Version: 0.9.0
 Release: 1
 License: LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.opendap.org/
 Source0: http://www.opendap.org/pub/source/%{name}-%{version}.tar.gz
 Requires: libdap >= 3.11.0
-Requires: netcdf >= 3.6
-Requires: bes >= 3.9.0
+# Requires: netcdf >= 3.6
+Requires: bes >= 3.11.0
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:   libdap-devel >= 3.11.0
-BuildRequires:   netcdf-devel >= 3.6
-BuildRequires:   bes-devel >= 3.9.0
+# BuildRequires:   netcdf-devel >= 3.6
+BuildRequires:   bes-devel >= 3.11.0
 
 %description
-This is the fileout netCDF response handler for Hyrax - the OPeNDAP data
+This is the fileout GDAL response handler for Hyrax - the OPeNDAP data
 server. With this handler a server can easily be configured to return
-data packaged in a netCDF 3 file.
+data packaged in a GeoTiff, JP2, etc., file.
 
 %prep
 %setup -q
@@ -31,7 +31,7 @@ make %{?_smp_mflags}
 rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install INSTALL="install -p"
 
-rm $RPM_BUILD_ROOT%{_libdir}/bes/libfonc_module.la
+rm $RPM_BUILD_ROOT%{_libdir}/bes/libfong_module.la
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -44,17 +44,11 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %dir %{_sysconfdir}/bes/
 %dir %{_sysconfdir}/bes/modules
-%config(noreplace) %{_sysconfdir}/bes/modules/fonc.conf
-%{_libdir}/bes/libfonc_module.so
+%config(noreplace) %{_sysconfdir}/bes/modules/fong.conf
+%{_libdir}/bes/libfong_module.so
 %doc COPYING COPYRIGHT NEWS README
 
 %changelog
-* Sat May  1 2010 Patrick West <westp@rpi.edu> - 1.0.1-1
-- Update to 1.0.1
-
-* Tue Feb  2 2010 Patrick West <westp@rpi.edu> - 1.0.0-1
-- Update to 1.0.0
-
-* Mon Mar 16 2009 James Gallagher <jgallagher@opendap.org> - 
+* Tue Nov 20 2012 James Gallagher <jgallagher@opendap.org> - 
 - Initial build.
 
