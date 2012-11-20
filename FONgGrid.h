@@ -1,0 +1,70 @@
+// FONgGrid.h
+
+// This file is part of BES Netcdf File Out Module
+
+// Copyright (c) 2004,2005 University Corporation for Atmospheric Research
+// Author: Patrick West <pwest@ucar.edu> and Jose Garcia <jgarcia@ucar.edu>
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+// You can contact University Corporation for Atmospheric Research at
+// 3080 Center Green Drive, Boulder, CO 80301
+
+// (c) COPYRIGHT University Corporation for Atmospheric Research 2004-2005
+// Please read the full copyright statement in the file COPYRIGHT_UCAR.
+//
+// Authors:
+//      pwest       Patrick West <pwest@ucar.edu>
+//      jgarcia     Jose Garcia <jgarcia@ucar.edu>
+
+#ifndef FONgGrid_h_
+#define FONgGrid_h_ 1
+
+#include "FONgBaseType.h"
+
+class FONgTransform;
+
+/** @brief A DAP Grid with file out netcdf information included
+ *
+ * This class represents a DAP Grid with additional information
+ * needed to write it out to a netcdf file. Includes a reference to the
+ * actual DAP Grid being converted, the maps of the grid stored as
+ * FOncMap instances, and the array of the grid stored as a FONgArray.
+ *
+ * NetCDF does not have grid representation. For this reason, we flatten
+ * out the grid as different arrays (maps) as well as the grid's actual
+ * array.
+ *
+ * It is possible to share maps among grids, so a global map list is
+ * kept as well.
+ */
+class FONgGrid: public FONgBaseType {
+private:
+    Grid *d_grid;
+    bool d_three_dims;
+
+public:
+    FONgGrid(Grid *g);
+    virtual ~FONgGrid();
+
+    Grid *grid() { return d_grid; }
+
+    bool three_dims() { return d_three_dims; }
+
+    virtual void extract_coordinates(FONgTransform &t);
+
+};
+
+#endif // FONgGrid_h_
