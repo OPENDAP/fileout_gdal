@@ -1,9 +1,9 @@
 // FONgTransmitter.cc
 
-// This file is part of BES Netcdf File Out Module
+// This file is part of BES GDAL File Out Module
 
-// Copyright (c) 2004,2005 University Corporation for Atmospheric Research
-// Author: Patrick West <pwest@ucar.edu> and Jose Garcia <jgarcia@ucar.edu>
+// Copyright (c) 2012 OPeNDAP, Inc.
+// Author: James Gallagher <jgallagher@opendap.org>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -21,13 +21,6 @@
 //
 // You can contact University Corporation for Atmospheric Research at
 // 3080 Center Green Drive, Boulder, CO 80301
-
-// (c) COPYRIGHT University Corporation for Atmospheric Research 2004-2005
-// Please read the full copyright statement in the file COPYRIGHT_UCAR.
-//
-// Authors:
-//      pwest       Patrick West <pwest@ucar.edu>
-//      jgarcia     Jose Garcia <jgarcia@ucar.edu>
 
 #include "config.h"
 
@@ -57,24 +50,29 @@ using namespace libdap;
 
 #include <TheBESKeys.h>
 
-#define FONC_TEMP_DIR "/tmp"
+#define FONG_TEMP_DIR "/tmp"
 
 string FONgTransmitter::temp_dir;
 
-/** @brief Construct the FONgTransmitter, adding it with name netcdf to be
+/** @brief Construct the FONgTransmitter, adding it with name geotiff to be
  * able to transmit a data response
  *
  * The transmitter is created to add the ability to return OPeNDAP data
- * objects (DataDDS) as a netcdf file.
+ * objects (DataDDS) as a geotiff file.
  *
- * The OPeNDAP data object is written to a netcdf file locally in a
+ * The OPeNDAP data object is written to a geotiff file locally in a
  * temporary directory specified by the BES configuration parameter
  * FONg.Tempdir. If this variable is not found or is not set then it
- * defaults to the macro definition FONC_TEMP_DIR.
+ * defaults to the macro definition FONG_TEMP_DIR.
+ *
+ * @note The mapping from a 'returnAs' of "geotiff" to this code
+ * is made in the FONgModule class.
+ *
+ * @see FONgModule
  */
-FONgTransmitter::FONgTransmitter() :
-        BESBasicTransmitter()
+FONgTransmitter::FONgTransmitter() :  BESBasicTransmitter()
 {
+    // DATA_SERVICE == "dods"
     add_method(DATA_SERVICE, FONgTransmitter::send_data);
 
     if (FONgTransmitter::temp_dir.empty()) {
@@ -83,7 +81,7 @@ FONgTransmitter::FONgTransmitter() :
         string key = "FONg.Tempdir";
         TheBESKeys::TheKeys()->get_value(key, FONgTransmitter::temp_dir, found);
         if (!found || FONgTransmitter::temp_dir.empty()) {
-            FONgTransmitter::temp_dir = FONC_TEMP_DIR;
+            FONgTransmitter::temp_dir = FONG_TEMP_DIR;
         }
         string::size_type len = FONgTransmitter::temp_dir.length();
         if (FONgTransmitter::temp_dir[len - 1] == '/') {
@@ -147,21 +145,6 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
 
     // now we need to read the data
     BESDEBUG( "fong", "FONgTransmitter::send_data - reading data into DataDDS" << endl);
-
-    // Iterate through the variables in the DataDDS and read
-    // in the data if the variable has the send flag set.
-
-#if 0
-    // TODO This will read all the vars when no constraint is given; reading
-    // data should only happen once valid variables have been found.
-    for (DDS::Vars_iter i = dds->var_begin(); i != dds->var_end(); i++) {
-        // No Sequences in GeoTiff
-        if ((*i)->send_p() && (*i)->type() != dods_sequence_c) {
-            BESDEBUG( "fong", "reading " << (*i)->name() << endl );
-            (*i)->intern_data(bdds->get_ce(), *dds);
-        }
-    }
-#endif
 
     string temp_file_name = FONgTransmitter::temp_dir + '/' + "geotiffXXXXXX";
     vector<char> temp_full(temp_file_name.length() + 1);

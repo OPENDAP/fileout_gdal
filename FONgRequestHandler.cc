@@ -1,10 +1,9 @@
 // FONgRequestHandler.cc
 
-// This file is part of bes, A C++ back-end server implementation framework
-// for the OPeNDAP Data Access Protocol.
+// This file is part of BES GDAL File Out Module
 
-// Copyright (c) 2004,2005 University Corporation for Atmospheric Research
-// Author: Patrick West <pwest@ucar.edu> and Jose Garcia <jgarcia@ucar.edu>
+// Copyright (c) 2012 OPeNDAP, Inc.
+// Author: James Gallagher <jgallagher@opendap.org>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -23,13 +22,6 @@
 // You can contact University Corporation for Atmospheric Research at
 // 3080 Center Green Drive, Boulder, CO 80301
 
-// (c) COPYRIGHT University Corporation for Atmospheric Research 2004-2005
-// Please read the full copyright statement in the file COPYRIGHT_UCAR.
-//
-// Authors:
-//      pwest       Patrick West <pwest@ucar.edu>
-//      jgarcia     Jose Garcia <jgarcia@ucar.edu>
-
 #include "FONgRequestHandler.h"
 #include <BESResponseHandler.h>
 #include <BESResponseNames.h>
@@ -39,7 +31,7 @@
 #include <TheBESKeys.h>
 #include "config.h"
 
-/** @brief Constructor for FileOut NetCDF module
+/** @brief Constructor for FileOut GDAL module
  *
  * This constructor adds functions to add to the build of a help request
  * and a version request to the BES.
@@ -60,11 +52,11 @@ FONgRequestHandler::~FONgRequestHandler()
 {
 }
 
-/** @brief adds help information for FileOut NetCDF to a help request
+/** @brief adds help information for FileOut GDAL to a help request
  *
  * Adds information to a help request to the BES regarding a file out
- * netcdf response. Included in this information is a link to a
- * docs.opendap.org page that describes fileout netcdf.
+ * geotiff response. Included in this information is a link to a
+ * docs.opendap.org page that describes fileout geotiff.
  *
  * @param dhi The data interface containing information for the current
  * request to the BES
@@ -83,7 +75,8 @@ bool FONgRequestHandler::build_help(BESDataHandlerInterface &dhi)
     string ref;
     TheBESKeys::TheKeys()->get_value(key, ref, found);
     if (ref.empty())
-        ref = "http://docs.opendap.org/index.php/BES_-_Modules_-_FileOut_Netcdf";
+        ref = "http://docs.opendap.org/index.php/BES_-_Modules_-_FileOut_GDAL";
+
     map<string, string> attrs;
     attrs["name"] = PACKAGE_NAME;
     attrs["version"] = PACKAGE_VERSION;

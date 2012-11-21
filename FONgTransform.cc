@@ -1,9 +1,9 @@
 // FONgTransform.cc
 
-// This file is part of BES Netcdf File Out Module
+// This file is part of BES GDAL File Out Module
 
-// Copyright (c) 2004,2005 University Corporation for Atmospheric Research
-// Author: Patrick West <pwest@ucar.edu> and Jose Garcia <jgarcia@ucar.edu>
+// Copyright (c) 2012 OPeNDAP, Inc.
+// Author: James Gallagher <jgallagher@opendap.org>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,6 @@
 // You can contact University Corporation for Atmospheric Research at
 // 3080 Center Green Drive, Boulder, CO 80301
 
-// (c) COPYRIGHT University Corporation for Atmospheric Research 2004-2005
-// Please read the full copyright statement in the file COPYRIGHT_UCAR.
-//
-// Authors:
-//      pwest       Patrick West <pwest@ucar.edu>
-//      jgarcia     Jose Garcia <jgarcia@ucar.edu>
-
 #include "config.h"
 
 #include <gdal.h>
@@ -41,6 +34,7 @@
 #include <Structure.h>
 #include <Array.h>
 #include <Grid.h>
+#include <ce_functions.h>
 
 #include <BESDebug.h>
 #include <BESInternalError.h>
@@ -204,19 +198,15 @@ double *FONgTransform::geo_transform()
    d_gt[4] = 0.0;
 
    // Compute the lower left values
-   d_gt[1] = (d_bottom - d_top) / d_width; // witdh in pixels; top and bottom in lat
+   d_gt[1] = (d_bottom - d_top) / d_width; // width in pixels; top and bottom in lat
    d_gt[5] = (d_right - d_left) / d_height;
 
    return d_gt;
 }
 
-/** @brief Transforms each of the variables of the DataDDS to the NetCDF
- * file
+/** @brief Transforms each of the variables of the DataDDS to the GeoTiff
+ * or JPEG2000 file.
  *
- * For each variable in the DataDDS write out that variable and its
- * attributes to the netcdf file. Each OPeNDAP data type translates into a
- * particular netcdf type. Also write out any global variables stored at the
- * top level of the DataDDS.
  */
 void FONgTransform::transform()
 {
@@ -266,7 +256,7 @@ void FONgTransform::transform()
     // char **Options = NULL; args: name, x, y, nBands
     // FIXME num_bands hack
     char *options[] = { (char*)"GDAL_NODATA=-9.99999979e+33" };
-    d_dest = Driver->Create(d_localfile.c_str(), width(), height(), 1/*num_bands()*/, DAP_to_GDAL_type(type()), NULL);
+    d_dest = Driver->Create(d_localfile.c_str(), width(), height(), 1/*num_bands()*/, GDT_Byte/*DAP_to_GDAL_type(type())*/, NULL);
     if (!d_dest) {
         throw Error("Could not process request.");
     }
@@ -311,6 +301,7 @@ void FONgTransform::transform()
 
     // TODO check this once the code handles Array
 
+#if 0
     // FIXME hardcoded zero
     Grid *g = static_cast<FONgGrid*>(var(0))->grid();
     Array *a = static_cast<Array*>(g->array_var());
@@ -321,19 +312,44 @@ void FONgTransform::transform()
 
     a->value(&data[0]);
     BESDEBUG("fong", "Got Array '" << a->name() << "' from the grid" << endl);
+#endif
 
-    // hack the values
+    Grid *g = static_cast<FONgGrid*>(var(0))->grid();
+
+    if (!g->get_array()->read_p())
+        g->get_array()->read();
+
+    // This code assumes read() has been called.
+    double *data = extract_double_array(g->get_array());
+
+    // hack the values; because the missing value used with many datasets
+    // is really small, move it to some number just below the smallest value
+    // That is not the no_data value. Don't do any of this if there's no
+    // 'no_data' value.
+
+    // FIXME Assumed no_data is really small
+    // Find the smallest value that's not 'no_data'
+    double small = 0.0;
+    for (int i = 0; i < width() * height(); ++i)
+        if (data[i] > no_data() && data[i] < small)
+            small = data[i];
+
+    BESDEBUG("fong", "Min value: " << small << endl);
+
     for (int i = 0; i < width() * height(); ++i) {
-        if (data[i] <= -9.99999979e+33) {
-            BESDEBUG("fong", "Found a value to ignore" << endl);
-            data[i] = 0;
+        if (data[i] <= no_data()) {
+            BESDEBUG("fong2", "Found a value to ignore" << endl);
+            data[i] = small;
         }
     }
-#if 1
+
+    // The extract...() call above ensures the data are in a double array.
+    // Not always efficient, but simple
+
     CPLErr error = d_dest->RasterIO(GF_Write, 0, 0, width(), height(),
-            &data[0], width(), height(), DAP_to_GDAL_type(type()),
+            &data[0], width(), height(), GDT_Float64,
             /*BandCount*/1, /*BandMap - 0 --> all bands*/0,
             /*PixelSpace*/0, /*LineSpace*/0, /*BandSpace*/0);
-#endif
+
     GDALClose(d_dest);
 }

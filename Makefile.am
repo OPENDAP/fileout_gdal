@@ -1,7 +1,7 @@
 
 # Automake file for fileout_gdal
 #
-# 11/1/12 jhrg Copied from Patrick's fileout_netcdf code
+# 11/1/12 jhrg
 
 AUTOMAKE_OPTIONS = foreign check-news
 

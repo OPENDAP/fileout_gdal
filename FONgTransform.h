@@ -1,9 +1,9 @@
 // FONgTransform.h
 
-// This file is part of BES Netcdf File Out Module
+// This file is part of BES GDAL File Out Module
 
-// Copyright (c) 2004,2005 University Corporation for Atmospheric Research
-// Author: Patrick West <pwest@ucar.edu> and Jose Garcia <jgarcia@ucar.edu>
+// Copyright (c) 2012 OPeNDAP, Inc.
+// Author: James Gallagher <jgallagher@opendap.org>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -22,32 +22,11 @@
 // You can contact University Corporation for Atmospheric Research at
 // 3080 Center Green Drive, Boulder, CO 80301
 
-// (c) COPYRIGHT University Corporation for Atmospheric Research 2004-2005
-// Please read the full copyright statement in the file COPYRIGHT_UCAR.
-//
-// Authors:
-//      pwest       Patrick West <pwest@ucar.edu>
-//      jgarcia     Jose Garcia <jgarcia@ucar.edu>
-
 #ifndef FONgTransfrom_h_
 #define FONgTransfrom_h_ 1
 
-//#include <string>
-//#include <vector>
-//#include <map>
+#include <cstdlib>
 
-//#include <gdal_priv.h>
-
-//#include <DDS.h>
-//#include <Array.h>
-
-//using namespace std;
-//using namespace libdap;
-
-//#include <BESObj.h>
-//#include <BESDataHandlerInterface.h>
-
-//class ConstraintEvaluator;
 class FONgBaseType;
 class GDALDataset;
 class BESDataHandlerInterface;
@@ -77,7 +56,7 @@ private:
 
     // Collect data here
     double d_width, d_height, d_top, d_left, d_bottom, d_right;
-    string d_no_data;
+    double d_no_data;
 
     // Build GeoTransform info here
     double d_gt[6];
@@ -85,7 +64,7 @@ private:
     libdap::Type d_type;
     int d_num_bands;
 
-    int d_size_x;   // TODO needed? or use t1 and t5
+    int d_size_x;
     int d_size_y;
 
 public:
@@ -100,8 +79,8 @@ public:
     libdap::Type type() { return d_type; }
     void set_type(libdap::Type t) { d_type = t; }
 
-    string no_data() { return d_no_data; }
-    void set_no_data(const string &nd) { d_no_data = nd; }
+    double no_data() { return d_no_data; }
+    void set_no_data(const string &nd) { d_no_data = strtod(nd.c_str(), NULL); }
 
     int num_bands() { return d_num_bands; }
     void set_num_bands(int n) { d_num_bands = n; }

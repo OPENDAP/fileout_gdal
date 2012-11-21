@@ -1,9 +1,9 @@
 // FONgGrid.h
 
-// This file is part of BES Netcdf File Out Module
+// This file is part of BES GDAL File Out Module
 
-// Copyright (c) 2004,2005 University Corporation for Atmospheric Research
-// Author: Patrick West <pwest@ucar.edu> and Jose Garcia <jgarcia@ucar.edu>
+// Copyright (c) 2012 OPeNDAP, Inc.
+// Author: James Gallagher <jgallagher@opendap.org>
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -21,13 +21,6 @@
 //
 // You can contact University Corporation for Atmospheric Research at
 // 3080 Center Green Drive, Boulder, CO 80301
-
-// (c) COPYRIGHT University Corporation for Atmospheric Research 2004-2005
-// Please read the full copyright statement in the file COPYRIGHT_UCAR.
-//
-// Authors:
-//      pwest       Patrick West <pwest@ucar.edu>
-//      jgarcia     Jose Garcia <jgarcia@ucar.edu>
 
 #ifndef FONgGrid_h_
 #define FONgGrid_h_ 1
@@ -53,6 +46,15 @@ class FONgTransform;
 class FONgGrid: public FONgBaseType {
 private:
     Grid *d_grid;
+    Array *d_lat, *d_lon;
+
+    // Sets of string values used to find stuff in attributes
+    set<string> d_coards_lat_units;
+    set<string> d_coards_lon_units;
+
+    set<string> d_lat_names;
+    set<string> d_lon_names;
+
     bool d_three_dims;
 
 public:
@@ -60,6 +62,8 @@ public:
     virtual ~FONgGrid();
 
     Grid *grid() { return d_grid; }
+
+    bool find_lat_lon_maps();
 
     bool three_dims() { return d_three_dims; }
 
