@@ -28,9 +28,10 @@
 #include <BESObj.h>
 #include <BaseType.h>
 
-using namespace libdap ;
+// using namespace libdap ;
 
 class FONgTransform;
+class GDALDataset;
 
 /** @brief A DAP BaseType with file out gdal information included
  *
@@ -40,8 +41,8 @@ class FONgTransform;
  */
 class FONgBaseType: public BESObj {
 protected:
-
     string d_name;
+    libdap::Type d_type;
 
 public:
     FONgBaseType() {}
@@ -52,6 +53,10 @@ public:
     virtual string set_name(const string &n) { d_name = n; }
 
     virtual void extract_coordinates(FONgTransform &t) = 0;
+    virtual void set_projection(libdap::DDS *dds, GDALDataset *dest) = 0;
+
+    /** Get the data values for the band(s). Call must delete. */
+    virtual double *get_data() = 0;
 
     virtual void dump(ostream &strm) const {};
 };

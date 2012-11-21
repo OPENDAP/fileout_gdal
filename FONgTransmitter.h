@@ -42,6 +42,8 @@ class FONgTransmitter: public BESBasicTransmitter {
 private:
     static void return_temp_stream(const string &filename, ostream &strm);
     static string temp_dir;
+
+
 public:
     FONgTransmitter();
     virtual ~FONgTransmitter()
@@ -49,6 +51,8 @@ public:
     }
 
     static void send_data(BESResponseObject *obj, BESDataHandlerInterface &dhi);
+
+    static string default_gcs;
 };
 
 #endif // A_FONgTransmitter_h

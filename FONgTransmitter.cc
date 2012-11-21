@@ -51,8 +51,10 @@ using namespace libdap;
 #include <TheBESKeys.h>
 
 #define FONG_TEMP_DIR "/tmp"
+#define FONG_GCS "WGS84"
 
 string FONgTransmitter::temp_dir;
+string FONgTransmitter::default_gcs;
 
 /** @brief Construct the FONgTransmitter, adding it with name geotiff to be
  * able to transmit a data response
@@ -86,6 +88,16 @@ FONgTransmitter::FONgTransmitter() :  BESBasicTransmitter()
         string::size_type len = FONgTransmitter::temp_dir.length();
         if (FONgTransmitter::temp_dir[len - 1] == '/') {
             FONgTransmitter::temp_dir = FONgTransmitter::temp_dir.substr(0, len - 1);
+        }
+    }
+
+    if (FONgTransmitter::default_gcs.empty()) {
+        // Use what as teh default Geographic coordinate system?
+        bool found = false;
+        string key = "FONg.Default_GCS";
+        TheBESKeys::TheKeys()->get_value(key, FONgTransmitter::default_gcs, found);
+        if (!found || FONgTransmitter::default_gcs.empty()) {
+            FONgTransmitter::default_gcs = FONG_GCS;
         }
     }
 }
@@ -191,7 +203,7 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
     }
 
     close(fd);
-    //(void) unlink(&temp_full[0]);
+    (void) unlink(&temp_full[0]);
 
     BESDEBUG( "fong", "FONgTransmitter::send_data - done transmitting to geotiff" << endl);
 }

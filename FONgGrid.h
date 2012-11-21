@@ -28,6 +28,8 @@
 #include "FONgBaseType.h"
 
 class FONgTransform;
+//class Grid;
+//class Array;
 
 /** @brief A DAP Grid with file out netcdf information included
  *
@@ -45,8 +47,8 @@ class FONgTransform;
  */
 class FONgGrid: public FONgBaseType {
 private:
-    Grid *d_grid;
-    Array *d_lat, *d_lon;
+    libdap::Grid *d_grid;
+    libdap::Array *d_lat, *d_lon;
 
     // Sets of string values used to find stuff in attributes
     set<string> d_coards_lat_units;
@@ -57,17 +59,22 @@ private:
 
     bool d_three_dims;
 
+    bool m_lat_unit_or_name_match(const string &var_units, const string &var_name, const string &long_name);
+    bool m_lon_unit_or_name_match(const string &var_units, const string &var_name, const string &long_name);
+
 public:
-    FONgGrid(Grid *g);
+    FONgGrid(libdap::Grid *g);
     virtual ~FONgGrid();
 
-    Grid *grid() { return d_grid; }
+    libdap::Grid *grid() { return d_grid; }
 
     bool find_lat_lon_maps();
 
     bool three_dims() { return d_three_dims; }
 
     virtual void extract_coordinates(FONgTransform &t);
+    virtual void set_projection(libdap::DDS *dds, GDALDataset *dest);
+    virtual double *get_data();
 
 };
 

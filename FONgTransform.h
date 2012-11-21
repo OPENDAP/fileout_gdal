@@ -40,6 +40,9 @@ class BESDataHandlerInterface;
  */
 class FONgTransform : public BESObj
 {
+public:
+    typedef enum { none, negative, positive } no_data_type_t;
+
 private:
     GDALDataset *d_dest;
 
@@ -50,22 +53,24 @@ private:
 
     vector<FONgBaseType *> d_fong_vars;
 
-    // used when there is more than one variable
-    // TODO keep the 'more than one var' feature?
+    // used when there is more than one variable; this is possible
+    // when returning a GMLJP2 response but not a GeoTiff.
     bool d_geo_transform_set;
 
     // Collect data here
     double d_width, d_height, d_top, d_left, d_bottom, d_right;
     double d_no_data;
+    no_data_type_t d_no_data_type;
 
-    // Build GeoTransform info here
+    // Put GeoTransform info here
     double d_gt[6];
 
-    libdap::Type d_type;
     int d_num_bands;
 
     int d_size_x;
     int d_size_y;
+
+    void m_scale_data(double *data);
 
 public:
     FONgTransform(libdap::DDS *dds, libdap::ConstraintEvaluator &evaluator, const string &localfile);
@@ -76,22 +81,18 @@ public:
     bool is_geo_transform_set() { return d_geo_transform_set; }
     void geo_transform_set(bool state) { d_geo_transform_set = state; }
 
-    libdap::Type type() { return d_type; }
-    void set_type(libdap::Type t) { d_type = t; }
-
     double no_data() { return d_no_data; }
     void set_no_data(const string &nd) { d_no_data = strtod(nd.c_str(), NULL); }
+
+    void set_no_data_type(no_data_type_t t) { d_no_data_type = t; }
+    no_data_type_t no_data_type() { return d_no_data_type; }
 
     int num_bands() { return d_num_bands; }
     void set_num_bands(int n) { d_num_bands = n; }
 
     void push_var(FONgBaseType *v) { d_fong_vars.push_back(v); }
     int num_var() { return d_fong_vars.size(); }
-#if 0
-    typedef vector<FONgBaseType *>::iterator var_iter;
-    var_iter var_begin() { return d_fong_vars.begin(); }
-    var_iter var_end() { return d_fong_vars.end(); }
-#endif
+
     FONgBaseType *var(int i) { return d_fong_vars.at(i); }
 
     // Image/band height and width in pixels
