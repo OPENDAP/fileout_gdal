@@ -87,9 +87,8 @@ is_convertable_type(const BaseType *b)
         case dods_grid_c:
             return true;
 
-            // TODO Add these once the handler works with Grid
+        // TODO Add support for Array
         case dods_array_c:
-        case dods_structure_c:
         default:
             return false;
     }
@@ -109,9 +108,6 @@ static FONgBaseType *convert(BaseType *v)
 #if 0
     case dods_array_c:
         b = new FONgArray(v);
-        break;
-    case dods_structure_c:
-        b = new FONgStructure(v);
         break;
 #endif
     default:
@@ -208,6 +204,26 @@ double *FONgTransform::geo_transform()
    return d_gt;
 }
 
+bool FONgTransform::effectively_two_D(FONgBaseType *fbtp)
+{
+    if (fbtp->type() == dods_grid_c) {
+        Grid *g = static_cast<FONgGrid*>(fbtp)->grid();
+        if (g->get_array()->dimensions() == 2)
+            return true;
+        // count the dimensions with sizes other than 1
+        Array *a = g->get_array();
+        int dims = 0;
+        for (Array::Dim_iter d = a->dim_begin(); d != a->dim_end(); ++d) {
+            if (a->dimension_size(d, true) > 1)
+                ++dims;
+        }
+
+        return dims == 2;
+    }
+
+    return false;
+}
+
 // Helper function to descend into Structures looking for Grids (and Arrays
 // someday).
 static void recursive_look_for_vars(Structure *s, FONgTransform &t)
@@ -271,6 +287,10 @@ void FONgTransform::transform()
     if (num_bands() != 1)
         throw Error("GeoTiff responses can consist of one band only.");
 
+    // Hardcoded that there's only one variable when building a GeoTiff response
+    if (!effectively_two_D(var(0)))
+        throw Error("GeoTiff responses can consist of one two-dimension variable; use constraints to reduce he size of Grids and Arrays as needed.");
+
     BESDEBUG( "fong", "Past conversion loop" << endl );
 
     GDALAllRegister();
@@ -283,8 +303,11 @@ void FONgTransform::transform()
     if (!CSLFetchBoolean(Metadata, GDAL_DCAP_CREATE, FALSE))
         throw Error("Could not make output format.");
 
-    // char **Options = NULL; args: name, x, y, nBands
-    d_dest = Driver->Create(d_localfile.c_str(), width(), height(), 1/*num_bands()*/, GDT_Float64, NULL);
+    // NB: Changing PHOTOMETIC to MINISWHITE doesn't seem to have any visible affect,
+    // although the resulting files differ. jhrg 11/21/12
+    char **options = NULL;
+    options = CSLSetNameValue(options, "PHOTOMETRIC", "MINISBLACK" ); // The default for GDAL
+    d_dest = Driver->Create(d_localfile.c_str(), width(), height(), 1/*num_bands()*/, GDT_Float64, options);
     if (!d_dest)
         throw Error("Could not process request.");
 

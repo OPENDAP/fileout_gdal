@@ -71,6 +71,7 @@ private:
     int d_size_y;
 
     void m_scale_data(double *data);
+    bool effectively_two_D(FONgBaseType *fbtp);
 
 public:
     FONgTransform(libdap::DDS *dds, libdap::ConstraintEvaluator &evaluator, const string &localfile);

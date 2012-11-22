@@ -266,6 +266,8 @@ void FONgGrid::extract_coordinates(FONgTransform &t)
     }
 }
 
+
+/** Use CF to determine if this is a 'Spherical Earth' datum */
 static bool is_spherical(BaseType *btp)
 {
     /* crs:grid_mapping_name = "latitude_longitude"
@@ -273,14 +275,13 @@ static bool is_spherical(BaseType *btp)
     crs:inverse_flattening = 0 ; */
 
     bool gmn = btp->get_attr_table().get_attr("grid_mapping_name") == "latitude_longitude";
-
     bool sma = btp->get_attr_table().get_attr("semi_major_axis") == "6371000.0";
-
     bool iflat = btp->get_attr_table().get_attr("inverse_flattening") == "0";
 
     return gmn && sma && iflat;
 }
 
+/** Use CF to determine if this is a 'WGS84' datum */
 static bool is_wgs84(BaseType *btp)
 {
     /*crs:grid_mapping_name = "latitude_longitude";

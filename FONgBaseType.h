@@ -52,6 +52,9 @@ public:
     virtual string name() { return d_name; }
     virtual string set_name(const string &n) { d_name = n; }
 
+    virtual libdap::Type type() { return d_type; }
+    virtual void set_type(libdap::Type t) { d_type = t; }
+
     virtual void extract_coordinates(FONgTransform &t) = 0;
     virtual void set_projection(libdap::DDS *dds, GDALDataset *dest) = 0;
 

@@ -7,5 +7,4 @@
 # Note: This function is coupled to the naming scheme used in
 # hdf4_handlerTest.at
 
-besstandalone -c @abs_builddir@/bes.conf \
--i @abs_srcdir@/gdal/$1 | getdap -M - > @abs_srcdir@/gdal/$1.baseline
+besstandalone -c @abs_builddir@/bes.conf -i @abs_srcdir@/$1 > @abs_srcdir@/$1.tif

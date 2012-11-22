@@ -113,7 +113,6 @@ AM_CONDITIONAL([BUILD_HYRAX_DEBUG], [test "x$build_hyrax_debug" = "xtrue"])
 AC_CONFIG_FILES([Makefile])
 
 AC_CONFIG_FILES([tests/Makefile tests/package.m4 tests/atlocal])
-AC_CONFIG_FILES([tests/generate_metadata_baseline.sh], [chmod +x tests/generate_metadata_baseline.sh])
 AC_CONFIG_FILES([tests/generate_data_baseline.sh], [chmod +x tests/generate_data_baseline.sh])
 
 AC_CONFIG_TESTDIR(tests)

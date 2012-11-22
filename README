@@ -1,51 +1,44 @@
 
-Updated for version 1.1.2
+Updated for version 0.9.0
 
-See the INSTALL file for build and installation instructions.
+This handler builds a GeoTiff file from a DAP data response, with some
+caveats. The handler is limited to a single Grid variable and that
+Grid must be either a two-dimensional grid or be constrained so that
+only two dimensions remain once the constraint is applied.
 
-fileout_netcdf is a module to be loaded by the BES that will allow users to
-return a 'get dods' request as a netcdf file. A file is generated and then
-streamed back in the response.
+The handler tests the Grid for a number of properties in addition to
+the limitation that it be a 2D grid:
 
-An example is provided in the BES command line input file infile, which
-generates the file outfile. This is how one would use this input file:
+1. It must be a lat/lon grid, that follows CF (or be reasonably close
+to following the CF specification).
 
-bescmdln -h localhost -p 10002 -i infile -f outfile.test
+2. Only two datums are supported: Spherical Earth (EPSG:4047) and
+WGS84, although the default can be set from the module's conf file
+using the parameter FONg.default_gcs.
 
-And then you can compare the results of outfile with outfile.test. You
-should be able to run ncdump against this output file and it should be
-somewhat similar to the fnoc1.nc file in share/hyrax/data/nc.
+3. All the GeoTiffs are returned using doubles regardless of the
+datatype used for the original grid.
 
-How does it work?
+4. Because many datasets use 'missing' or 'no data' values that are
+often very small (e.g., -1e-34) and GDAL allocates colors/gray values
+so they evenly span the values, those missing data values are changed
+so that they are closer (but never overlap) the actual data values.
 
-The get dods command in the input file tells the BES to generate a DataDDS
-response object. Typically, this DataDDS response object is "transmitted"
-back to the caller using a function that is registered with a basic
-transmitter that knows how to transmit a dods response.
+5. To find the missing data value, the 'missing_value' or '_FillValue'
+attribute is used. If neither of those attributes are defined for the
+Grid variable, then the scaling is not performed.
 
-If the caller adds to the command 'return as "netcdf"' then the BES will try
-to find a transmitter called netcdf and call the function registered with it
-that knows how to transmit a dods response. So, if you look at FONcModule
-you will see the FONcTransmitter is registered with the ReturnManager with
-the name "netcdf".  The constructor of this new transmitter adds a function
-that knows how to transmit a dods response, see FONcTransmitter.cc. So, when
-it comes time to transmit the response it sees that the caller has specified
-a specific transmitter ("netcdf"), the BES looks up that transmitter, then
-looks up a function to handle the response ("dods"), calls that function and
-the function transmits the response using the output stream from the
-BESDataHandlerInterface (getOutputStream).
+6. In the resulting GoeTiff, black is the no data value.
 
-The FONcTransmitter first takes the response object passed, grabs the
-DataDDS object, and calls the read method on it to make sure that all of the
-data is read into the response object. Remember, this is lazy evaluation, so
-when the DataDDS response object is created, data structures are added to
-it, but no data is actually read into it. At least, this is the case for
-most of the handlers. Some read the data in directly, so the read call just
-returns.
+The handler can be extended in a number of ways.
 
-After calling read, the FONcTransmitter hands over everything to the
-FONcGridTransform class to write the data structure and data out to the
-netcdf file, and then that file is streamed (transmitted) back to the client.
+* The handler can be extended to support more bands if the logic for
+  RGB or RGBA responses can be sorted out.
 
-Any questions, please contact Patrick West at pwest@opendap.org.
+* The process used to determine the Geographic coordinate system could
+  be extended to more GCSs and also to include map projections.
 
+* Support for Arrays could be added.
+
+* The handler can be used to return other file types like JPEG2000 adn
+  GMLJP2. 
