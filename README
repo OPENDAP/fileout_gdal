@@ -14,19 +14,21 @@ to following the CF specification).
 
 2. Only two datums are supported: Spherical Earth (EPSG:4047) and
 WGS84, although the default can be set from the module's conf file
-using the parameter FONg.default_gcs.
+using the parameter FONg.default_gcs. Any datum that GDAL supports
+using a 'well known text' can be given, including EPSG:<num>. See
+GDAL for more info.
 
 3. All the GeoTiffs are returned using doubles regardless of the
 datatype used for the original grid.
 
 4. Because many datasets use 'missing' or 'no data' values that are
 often very small (e.g., -1e-34) and GDAL allocates colors/gray values
-so they evenly span the values, those missing data values are changed
+so they evenly span the range of values, those missing data values are changed
 so that they are closer (but never overlap) the actual data values.
 
 5. To find the missing data value, the 'missing_value' or '_FillValue'
 attribute is used. If neither of those attributes are defined for the
-Grid variable, then the scaling is not performed.
+DAP variable, then the scaling is not performed.
 
 6. In the resulting GoeTiff, black is the no data value.
 
@@ -40,5 +42,11 @@ The handler can be extended in a number of ways.
 
 * Support for Arrays could be added.
 
-* The handler can be used to return other file types like JPEG2000 adn
-  GMLJP2. 
+* The handler can be used to return other file types like JPEG2000 and
+  GMLJP2. To do this, add a new FONgTransmitter class, register it with
+  FONgModule and have that class call a new FONgTransformer::transform()
+  method.
+  
+Note: The handler uses three names with BESDEBUG: fong, fong2 and fong3. 
+The fong name provides the usual setup feedback for handler registration
+at runtime. The names fong2 and 3 provide more detail for runtime debugging.

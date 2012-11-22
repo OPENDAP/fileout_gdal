@@ -208,7 +208,7 @@ bool FONgGrid::find_lat_lon_maps()
  */
 void FONgGrid::extract_coordinates(FONgTransform &t)
 {
-    BESDEBUG("fong", "Entering FONgGrid::extract_coordinates" << endl);
+    BESDEBUG("fong3", "Entering FONgGrid::extract_coordinates" << endl);
 
     double *lat = 0, *lon = 0;
     try {
@@ -237,7 +237,7 @@ void FONgGrid::extract_coordinates(FONgTransform &t)
         if (missing_value.empty())
             missing_value = d_grid->get_array()->get_attr_table().get_attr("_FillValue");
 
-        BESDEBUG("fong", "Attributes: " << missing_value << endl);
+        BESDEBUG("fong3", "missing_value attribute: " << missing_value << endl);
 
         // NB: no_data_type() is 'none' by default
         if (!missing_value.empty()) {

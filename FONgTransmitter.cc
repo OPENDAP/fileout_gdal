@@ -138,7 +138,7 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
         throw pe;
     }
 
-    BESDEBUG( "fong", "FONgTransmitter::send_data - parsing the constraint" << endl);
+    BESDEBUG("fong2", "FONgTransmitter::send_data - parsing the constraint" << endl);
 
     // ticket 1248 jhrg 2/23/09
     string ce = www2id(dhi.data[POST_CONSTRAINT], "%", "%20%26");
@@ -156,7 +156,7 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
     }
 
     // now we need to read the data
-    BESDEBUG( "fong", "FONgTransmitter::send_data - reading data into DataDDS" << endl);
+    BESDEBUG("fong2", "FONgTransmitter::send_data - reading data into DataDDS" << endl);
 
     string temp_file_name = FONgTransmitter::temp_dir + '/' + "geotiffXXXXXX";
     vector<char> temp_full(temp_file_name.length() + 1);
@@ -172,7 +172,7 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
         throw BESInternalError("Failed to open the temporary file: " + temp_file_name, __FILE__, __LINE__);
 
     // transform the OPeNDAP DataDDS to the geotiff file
-    BESDEBUG( "fong", "FONgTransmitter::send_data - transforming into temporary file " << &temp_full[0] << endl);
+    BESDEBUG("fong2", "FONgTransmitter::send_data - transforming into temporary file " << &temp_full[0] << endl);
 
     try {
         FONgTransform ft(dds, bdds->get_ce(), &temp_full[0]);
@@ -180,7 +180,7 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
         // transform() opens the temporary file, dumps data to it and closes it.
         ft.transform();
 
-        BESDEBUG( "fong", "FONgTransmitter::send_data - transmitting temp file " << &temp_full[0] << endl );
+        BESDEBUG("fong2", "FONgTransmitter::send_data - transmitting temp file " << &temp_full[0] << endl );
 
         FONgTransmitter::return_temp_stream(&temp_full[0], strm);
     }
@@ -205,7 +205,7 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
     close(fd);
     (void) unlink(&temp_full[0]);
 
-    BESDEBUG( "fong", "FONgTransmitter::send_data - done transmitting to geotiff" << endl);
+    BESDEBUG("fong2", "FONgTransmitter::send_data - done transmitting to geotiff" << endl);
 }
 
 /** @brief stream the temporary file back to the requester

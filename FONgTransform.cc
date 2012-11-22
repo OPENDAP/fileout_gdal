@@ -137,7 +137,7 @@ void FONgTransform::m_scale_data(double *data)
     for (int i = 0; i < width() * height(); ++i)
         hist.insert(data[i]);
 
-    BESDEBUG("fong", "Hist count: " << hist.size() << endl);
+    BESDEBUG("fong3", "Hist count: " << hist.size() << endl);
 
     if (no_data_type() == negative && hist.size() > 1) {
         // Values are sorted by 'weak' <, so this is the smallest value
@@ -151,7 +151,7 @@ void FONgTransform::m_scale_data(double *data)
         if (fabs(smallest + no_data()) > 1) {
             smallest -= 1.0;
 
-            BESDEBUG("fong", "New no_data value: " << smallest << endl);
+            BESDEBUG("fong3", "New no_data value: " << smallest << endl);
 
             for (int i = 0; i < width() * height(); ++i) {
                 if (data[i] <= no_data()) {
@@ -166,7 +166,7 @@ void FONgTransform::m_scale_data(double *data)
         if (fabs(no_data() - biggest) > 1) {
             biggest += 1.0;
 
-            BESDEBUG("fong", "New no_data value: " << biggest << endl);
+            BESDEBUG("fong3", "New no_data value: " << biggest << endl);
 
             for (int i = 0; i < width() * height(); ++i) {
                 if (data[i] >= no_data()) {
@@ -232,7 +232,7 @@ static void recursive_look_for_vars(Structure *s, FONgTransform &t)
     //DDS::Vars_iter vi = d_dds->var_begin();
     while (vi != s->var_end()) {
         if ((*vi)->send_p() && is_convertable_type(*vi)) {
-            BESDEBUG( "fong", "converting " << (*vi)->name() << endl);
+            BESDEBUG( "fong3", "converting " << (*vi)->name() << endl);
 
             // Build the delegate
             FONgBaseType *fb = convert(*vi);
@@ -258,7 +258,7 @@ static void look_for_vars(DDS *dds, FONgTransform &t)
     DDS::Vars_iter vi = dds->var_begin();
     while (vi != dds->var_end()) {
         if ((*vi)->send_p() && is_convertable_type(*vi)) {
-            BESDEBUG( "fong", "converting " << (*vi)->name() << endl);
+            BESDEBUG( "fong3", "converting " << (*vi)->name() << endl);
 
             // Build the delegate
             FONgBaseType *fb = convert(*vi);
@@ -291,8 +291,6 @@ void FONgTransform::transform()
     if (!effectively_two_D(var(0)))
         throw Error("GeoTiff responses can consist of one two-dimension variable; use constraints to reduce he size of Grids and Arrays as needed.");
 
-    BESDEBUG( "fong", "Past conversion loop" << endl );
-
     GDALAllRegister();
 
     GDALDriver *Driver = GetGDALDriverManager()->GetDriverByName("GTiff");
@@ -317,7 +315,7 @@ void FONgTransform::transform()
 
     fbtp->set_projection(d_dds, d_dest);
 
-    BESDEBUG("fong", "Made new temp file and set georeferencing (" << num_var() << " vars)." << endl);
+    BESDEBUG("fong3", "Made new temp file and set georeferencing (" << num_var() << " vars)." << endl);
 
     double *data = fbtp->get_data();
 
@@ -326,7 +324,7 @@ void FONgTransform::transform()
         // is often really small it'll skew the mapping of values to the grayscale
         // that GDAL performs. Move the no_data values to something closer to the
         // other values in the dataset.
-        BESDEBUG("fong", "no_data_type(): " << no_data_type() << endl);
+        BESDEBUG("fong3", "no_data_type(): " << no_data_type() << endl);
         if (no_data_type() != none)
             m_scale_data(data);
 
