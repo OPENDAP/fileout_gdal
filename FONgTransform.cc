@@ -289,7 +289,7 @@ void FONgTransform::transform()
 
     // Hardcoded that there's only one variable when building a GeoTiff response
     if (!effectively_two_D(var(0)))
-        throw Error("GeoTiff responses can consist of one two-dimension variable; use constraints to reduce he size of Grids and Arrays as needed.");
+        throw Error("GeoTiff responses can consist of one two-dimensional variable; use constraints to reduce he size of Grids and Arrays as needed.");
 
     GDALAllRegister();
 
