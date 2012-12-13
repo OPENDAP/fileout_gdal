@@ -1,0 +1,51 @@
+2012-12-13  James Gallagher <jgallagher@opendap.org>
+
+	Removed this extraneous file
+
+	D    svn-commit.tmp
+
+2012-12-13  James Gallagher <jgallagher@opendap.org>
+
+	Fixed a bug in the way the geotransform coefs were computed.
+	Images now look correct and a simple sampling of values shows the
+	lat/lon values are sensible.
+
+2012-11-21  James Gallagher <jgallagher@opendap.org>
+
+	Added an 'error response' test.
+
+2012-11-21  James Gallagher <jgallagher@opendap.org>
+
+	Changed svn ignore properties
+
+2012-11-21  James Gallagher <jgallagher@opendap.org>
+
+	Fixed minor issues with the conf file.
+
+2012-11-21  James Gallagher <jgallagher@opendap.org>
+
+	Tweaks plus more info in the README.
+
+2012-11-21  James Gallagher <jgallagher@opendap.org>
+
+	Made a handful of minor changes, added README information and one test.
+
+2012-11-21  James Gallagher <jgallagher@opendap.org>
+
+	Initial version of the GeoTiff response builder. This version
+	works for Grids only and only knows about two datums: Spherical
+	Earth and WGS84. It relies on CF to provide mapping information.
+
+2012-11-20  James Gallagher <jgallagher@opendap.org>
+
+	Checkpoint - some of the hardcoded values have been removed.
+	Forced to use double values.
+
+2012-11-20  James Gallagher <jgallagher@opendap.org>
+
+	Changed svn ignore properties
+
+2012-11-20  James Gallagher <jgallagher@opendap.org>
+
+	Added fileout gdal to the hyrax 1.8 release branch.
+

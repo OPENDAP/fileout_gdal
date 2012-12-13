@@ -24,7 +24,7 @@ datatype used for the original grid.
 4. Because many datasets use 'missing' or 'no data' values that are
 often very small (e.g., -1e-34) and GDAL allocates colors/gray values
 so they evenly span the range of values, those missing data values are changed
-so that they are closer (but never overlap) the actual data values.
+so that they are closer to (but never overlap) the actual data values.
 
 5. To find the missing data value, the 'missing_value' or '_FillValue'
 attribute is used. If neither of those attributes are defined for the
