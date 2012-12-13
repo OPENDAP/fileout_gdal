@@ -116,6 +116,7 @@ static FONgBaseType *convert(BaseType *v)
 }
 
 /** @breif scale the values for a better looking result
+ *
  * Often datasets use very small (or less often, very large) values
  * to indicate 'no data' or 'missing data'. The GDAL library scales
  * data so that the entire range of data values are represented in
@@ -125,8 +126,9 @@ static FONgBaseType *convert(BaseType *v)
  * value based on the smallest (or largest) value that is greater
  * than (or less than) the no data value.
  *
- * @note The no data value is determined be looking at attributes and
- * is done by FONgBaseType::extract_coordinates()
+ * @note The initial no data value is determined be looking at attributes and
+ * is done by FONgBaseType::extract_coordinates().
+ * @note It's an error to call this if no_data_type() is 'none'.
  *
  * @param data The data values to fiddle
  */
@@ -145,7 +147,7 @@ void FONgTransform::m_scale_data(double *data)
         // smallest value in the data set and ++i is the smallest actual
         // data value. Reset the no_data value to be 1.0 < the smallest
         // actual value. This makes for a good grayscale photometric
-        // GeoTiff w/o changing the actuall data values.
+        // GeoTiff w/o changing the actual data values.
         set<double>::iterator i = hist.begin();
         double smallest = *(++i);
         if (fabs(smallest + no_data()) > 1) {
@@ -178,8 +180,9 @@ void FONgTransform::m_scale_data(double *data)
 }
 
 /** @brief Build the geotransform array needed by GDAL
+ *
  * This code uses values gleaned by FONgBaseType:extract_coordinates()
- * to build up the six value array of transform paramaeters that
+ * to build up the six value array of transform parameters that
  * GDAL needs to set the geographic transform.
  *
  * @note This method returns a pointer to a class field; don't delete
@@ -189,27 +192,46 @@ void FONgTransform::m_scale_data(double *data)
  */
 double *FONgTransform::geo_transform()
 {
-   // The values for gt[0] and gt[3] are the geographic coords of the top left pixel
-   d_gt[0] = d_top;
-   d_gt[3] = d_left;
 
-   // We assume data w/o any rotation (and a north-up image)
-   d_gt[2] = 0.0;
-   d_gt[4] = 0.0;
+    BESDEBUG("fong3", "left: " << d_left << ", top: " << d_top << ", right: " << d_right << ", bottom: " << d_bottom << endl);
+    BESDEBUG("fong3", "width: " << d_width << ", height: " << d_height << endl);
 
-   // Compute the lower left values
-   d_gt[1] = (d_bottom - d_top) / d_width; // width in pixels; top and bottom in lat
-   d_gt[5] = (d_right - d_left) / d_height;
+    d_gt[0] = d_left;
+    d_gt[3] = d_top;
+
+    // We assume data w/o any rotation (and a north-up image)
+    d_gt[2] = 0.0;
+    d_gt[4] = 0.0;
+
+    // Compute the lower left values
+    d_gt[1] = (d_right - d_left) / d_width; // width in pixels; top and bottom in lat
+    d_gt[5] = (d_bottom - d_top) / d_height;
+
+    BESDEBUG("fong3", "gt[0]: " << d_gt[0] << ", gt[1]: " << d_gt[1] << ", gt[2]: " << d_gt[2] \
+             << ", gt[3]: " << d_gt[3] << ", gt[4]: " << d_gt[4] << ", gt[5]: " << d_gt[5] << endl);
 
    return d_gt;
 }
 
+/** @brief Is this effectively a two-dimensional variable?
+ *
+ * Look at teh Grid's Array and see if it is either a 2D array
+ * or if it has been subset so that all but two dimensions are
+ * removed. Assume that users know what they are doing.
+ *
+ * @note This code returns false for anything other than a
+ * Grid.
+ *
+ * @return True if this is a 2D array, false otherwise.
+ */
 bool FONgTransform::effectively_two_D(FONgBaseType *fbtp)
 {
     if (fbtp->type() == dods_grid_c) {
         Grid *g = static_cast<FONgGrid*>(fbtp)->grid();
+
         if (g->get_array()->dimensions() == 2)
             return true;
+
         // count the dimensions with sizes other than 1
         Array *a = g->get_array();
         int dims = 0;
@@ -260,7 +282,8 @@ static void look_for_vars(DDS *dds, FONgTransform &t)
         if ((*vi)->send_p() && is_convertable_type(*vi)) {
             BESDEBUG( "fong3", "converting " << (*vi)->name() << endl);
 
-            // Build the delegate
+            // Build the delegate; Get a FONg type for the given
+            // DAP type.
             FONgBaseType *fb = convert(*vi);
 
             // Get the information needed for the transform
@@ -328,9 +351,6 @@ void FONgTransform::transform()
         if (no_data_type() != none)
             m_scale_data(data);
 
-        // The extract...() call above ensures the data are in a double array.
-        // Not always efficient, but simple
-
         CPLErr error = d_dest->RasterIO(GF_Write, 0, 0, width(), height(),
                 data, width(), height(), GDT_Float64,
                 /*BandCount*/1, /*BandMap - 0 --> all bands*/0,
@@ -348,5 +368,4 @@ void FONgTransform::transform()
 
         throw;
     }
-
 }

@@ -92,7 +92,7 @@ FONgTransmitter::FONgTransmitter() :  BESBasicTransmitter()
     }
 
     if (FONgTransmitter::default_gcs.empty()) {
-        // Use what as teh default Geographic coordinate system?
+        // Use what as the default Geographic coordinate system?
         bool found = false;
         string key = "FONg.Default_GCS";
         TheBESKeys::TheKeys()->get_value(key, FONgTransmitter::default_gcs, found);
@@ -158,52 +158,56 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
     // now we need to read the data
     BESDEBUG("fong2", "FONgTransmitter::send_data - reading data into DataDDS" << endl);
 
+    // Huh? Put the template for the temp file name in a char array. Use vector<char>
+    // to avoid using new/delete.
     string temp_file_name = FONgTransmitter::temp_dir + '/' + "geotiffXXXXXX";
-    vector<char> temp_full(temp_file_name.length() + 1);
-    string::size_type len = temp_file_name.copy(&temp_full[0], temp_file_name.length());
-    temp_full[len] = '\0';
+    vector<char> temp_file(temp_file_name.length() + 1);
+    string::size_type len = temp_file_name.copy(&temp_file[0], temp_file_name.length());
+    temp_file[len] = '\0';
+
     // cover the case where older versions of mkstemp() create the file using
     // a mode of 666.
     mode_t original_mode = umask(077);
-    int fd = mkstemp(&temp_full[0]);
+
+    // Make and open (an atomic operation) the temporary file. Then reset the umask
+    int fd = mkstemp(&temp_file[0]);
     umask(original_mode);
 
     if (fd == -1)
         throw BESInternalError("Failed to open the temporary file: " + temp_file_name, __FILE__, __LINE__);
 
     // transform the OPeNDAP DataDDS to the geotiff file
-    BESDEBUG("fong2", "FONgTransmitter::send_data - transforming into temporary file " << &temp_full[0] << endl);
+    BESDEBUG("fong2", "FONgTransmitter::send_data - transforming into temporary file " << &temp_file[0] << endl);
 
     try {
-        FONgTransform ft(dds, bdds->get_ce(), &temp_full[0]);
+        FONgTransform ft(dds, bdds->get_ce(), &temp_file[0]);
 
         // transform() opens the temporary file, dumps data to it and closes it.
         ft.transform();
 
-        BESDEBUG("fong2", "FONgTransmitter::send_data - transmitting temp file " << &temp_full[0] << endl );
+        BESDEBUG("fong2", "FONgTransmitter::send_data - transmitting temp file " << &temp_file[0] << endl );
 
-        FONgTransmitter::return_temp_stream(&temp_full[0], strm);
+        FONgTransmitter::return_temp_stream(&temp_file[0], strm);
     }
     catch (BESError &e) {
         close(fd);
-        (void) unlink(&temp_full[0]);
+        (void) unlink(&temp_file[0]);
         throw;
     }
     catch (Error &e) {
         close(fd);
-        (void) unlink(&temp_full[0]);
+        (void) unlink(&temp_file[0]);
         throw BESInternalError(e.get_error_message(), __FILE__, __LINE__);
-        throw;
     }
 
     catch (...) {
         close(fd);
-        (void) unlink(&temp_full[0]);
+        (void) unlink(&temp_file[0]);
         throw BESInternalError("Fileout GeoTiff, was not able to transform to geotiff, unknown error", __FILE__, __LINE__);
     }
 
     close(fd);
-    (void) unlink(&temp_full[0]);
+    (void) unlink(&temp_file[0]);
 
     BESDEBUG("fong2", "FONgTransmitter::send_data - done transmitting to geotiff" << endl);
 }
