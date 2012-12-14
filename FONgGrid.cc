@@ -36,6 +36,7 @@
 
 #include "FONgTransmitter.h"
 #include "FONgTransform.h"
+#include "FONgBaseType.h"
 #include "FONgGrid.h"
 
 using namespace libdap;
@@ -250,8 +251,6 @@ void FONgGrid::extract_coordinates(FONgTransform &t)
 
         t.geo_transform_set(true);
 
-        // For GeoTiff there is only one band supported; other return types
-        // might support more than one band.
         t.set_num_bands(t.num_bands() + 1);
         t.push_var(this);
 
@@ -342,6 +341,56 @@ void FONgGrid::set_projection(DDS *dds, GDALDataset *dest)
     dest->SetProjection(srs_wkt);
 
     CPLFree(srs_wkt);
+}
+
+/** @brief Set the projection information
+ * For Grids, look for CF information. If it's not present, use the
+ * default Geographic Coordinate system set in the bes/module conf
+ * file. if it is present, look at the attributes and dope out a Well
+ * Known Geographic coordinate string.
+ */
+string FONgGrid::get_projection(DDS *dds)
+{
+    // Here's the information about the CF and projections
+    // http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.4/cf-conventions.html#grid-mappings-and-projections
+    // How this code looks for mapping information: Look for an
+    // attribute named 'grid_mapping' and get it's value. This attribute
+    // with be the name of a variable in the dataset, so get that
+    // variable. Now, look at the attributes of that variable.
+    string mapping_info = d_grid->get_attr_table().get_attr("grid_mapping");
+    if (mapping_info.empty())
+        mapping_info = d_grid->get_array()->get_attr_table().get_attr("grid_mapping");
+
+    string WK_GCS = FONgTransmitter::default_gcs;
+
+    if (!mapping_info.empty()) {
+        // "WGS84": same as "EPSG:4326" but has no dependence on EPSG data files.
+        // "WGS72": same as "EPSG:4322" but has no dependence on EPSG data files.
+        // "NAD27": same as "EPSG:4267" but has no dependence on EPSG data files.
+        // "NAD83": same as "EPSG:4269" but has no dependence on EPSG data files.
+        // "EPSG:n": same as doing an ImportFromEPSG(n).
+
+        // The mapping info is actually stored as attributes of an Int32 variable.
+        BaseType *btp = dds->var(mapping_info);
+        if (btp->name() == "crs") {
+            if (is_wgs84(btp))
+                WK_GCS = "WGS84";
+            else if (is_spherical(btp))
+                WK_GCS = "EPSG:4047";
+        }
+    }
+
+    OGRSpatialReference srs;
+    srs.SetWellKnownGeogCS(WK_GCS.c_str());
+    char *srs_wkt = NULL;
+    srs.exportToWkt(&srs_wkt);
+
+    string wkt = srs_wkt;   // save the result
+    //dest->SetProjection(srs_wkt);
+
+    CPLFree(srs_wkt);       // free memory alloced by GDAL
+
+    return wkt;
 }
 
 double *FONgGrid::get_data()

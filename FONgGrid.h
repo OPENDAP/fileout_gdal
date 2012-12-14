@@ -25,11 +25,11 @@
 #ifndef FONgGrid_h_
 #define FONgGrid_h_ 1
 
-#include "FONgBaseType.h"
-
 class FONgTransform;
-//class Grid;
-//class Array;
+class FONgBaseType;
+
+class libdap::Grid;
+class libdap::Array;
 
 /** @brief A DAP Grid with file out netcdf information included
  *
@@ -74,6 +74,7 @@ public:
 
     virtual void extract_coordinates(FONgTransform &t);
     virtual void set_projection(libdap::DDS *dds, GDALDataset *dest);
+    string get_projection(libdap::DDS *dds);
     virtual double *get_data();
 
 };

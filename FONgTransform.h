@@ -25,7 +25,7 @@
 #ifndef FONgTransfrom_h_
 #define FONgTransfrom_h_ 1
 
-#include <cstdlib>
+//#include <cstdlib>
 
 class FONgBaseType;
 class GDALDataset;

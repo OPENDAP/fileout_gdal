@@ -25,11 +25,7 @@
 #ifndef FONgBaseType_h_
 #define FONgBaseType_h_ 1
 
-#include <BESObj.h>
-#include <BaseType.h>
-
-// using namespace libdap ;
-
+class BESObj;
 class FONgTransform;
 class GDALDataset;
 
@@ -56,9 +52,14 @@ public:
     virtual void set_type(libdap::Type t) { d_type = t; }
 
     virtual void extract_coordinates(FONgTransform &t) = 0;
+
+    /// deprecated
     virtual void set_projection(libdap::DDS *dds, GDALDataset *dest) = 0;
 
-    /** Get the data values for the band(s). Call must delete. */
+    /// Get the GDAL/OGC WKT projection string
+    virtual string get_projection(libdap::DDS *dds) = 0;
+
+    ///Get the data values for the band(s). Call must delete.
     virtual double *get_data() = 0;
 
     virtual void dump(ostream &strm) const {};

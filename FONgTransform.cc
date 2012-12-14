@@ -24,6 +24,8 @@
 
 #include "config.h"
 
+#include <cstdlib>
+
 #include <gdal.h>
 #include <gdal_priv.h>
 
@@ -34,6 +36,7 @@
 #include <Array.h>
 #include <Grid.h>
 #include <ce_functions.h>
+#include <util.h>
 
 #include <BESDebug.h>
 #include <BESInternalError.h>
@@ -196,14 +199,16 @@ double *FONgTransform::geo_transform()
     BESDEBUG("fong3", "left: " << d_left << ", top: " << d_top << ", right: " << d_right << ", bottom: " << d_bottom << endl);
     BESDEBUG("fong3", "width: " << d_width << ", height: " << d_height << endl);
 
-    d_gt[0] = d_left;
-    d_gt[3] = d_top;
+    d_gt[0] = d_left; // The leftmost 'x' value, which is longitude
+    d_gt[3] = d_top;  // The topmost 'y' value, which is latitude
 
-    // We assume data w/o any rotation (and a north-up image)
+    // We assume data w/o any rotation (a north-up image)
     d_gt[2] = 0.0;
     d_gt[4] = 0.0;
 
-    // Compute the lower left values
+    // Compute the lower left values. Note that wehn GDAL builds the geotiff
+    // output dataset, it correctly inverts the image when the source data has
+    // inverted latitude values.
     d_gt[1] = (d_right - d_left) / d_width; // width in pixels; top and bottom in lat
     d_gt[5] = (d_bottom - d_top) / d_height;
 
@@ -246,14 +251,31 @@ bool FONgTransform::effectively_two_D(FONgBaseType *fbtp)
     return false;
 }
 
+static void build_delegate(BaseType *btp, FONgTransform &t)
+{
+    if (btp->send_p() && is_convertable_type(btp)) {
+        BESDEBUG( "fong3", "converting " << btp->name() << endl);
+
+        // Build the delegate
+        FONgBaseType *fb = convert(btp);
+
+        // Get the information needed for the transform.
+        // Note that FONgBaseType::extract_coordinates() also pushes the
+        // new FONgBaseType instance onto the FONgTransform's vector of
+        // delagate variable objects.
+        fb->extract_coordinates(t);
+    }
+}
+
 // Helper function to descend into Structures looking for Grids (and Arrays
 // someday).
-static void recursive_look_for_vars(Structure *s, FONgTransform &t)
+static void find_vars_helper(Structure *s, FONgTransform &t)
 {
     Structure::Vars_iter vi = s->var_begin();
-    //DDS::Vars_iter vi = d_dds->var_begin();
     while (vi != s->var_end()) {
         if ((*vi)->send_p() && is_convertable_type(*vi)) {
+            build_delegate(*vi, t);
+#if 0
             BESDEBUG( "fong3", "converting " << (*vi)->name() << endl);
 
             // Build the delegate
@@ -261,9 +283,10 @@ static void recursive_look_for_vars(Structure *s, FONgTransform &t)
 
             // Get the information needed for the transform
             fb->extract_coordinates(t);
+#endif
         }
         else if ((*vi)->type() == dods_structure_c) {
-            recursive_look_for_vars(static_cast<Structure*>(*vi), t);
+            find_vars_helper(static_cast<Structure*>(*vi), t);
         }
 
         ++vi;
@@ -275,12 +298,14 @@ static void recursive_look_for_vars(Structure *s, FONgTransform &t)
 // values in the FONgBaseType instance _and_ this instance of
 // FONgTransform. One of these is 'num_bands()'. For GeoTiff,
 // num_bands() must be 1. This is tested in transform().
-static void look_for_vars(DDS *dds, FONgTransform &t)
+static void find_vars(DDS *dds, FONgTransform &t)
 {
     DDS::Vars_iter vi = dds->var_begin();
     while (vi != dds->var_end()) {
         if ((*vi)->send_p() && is_convertable_type(*vi)) {
             BESDEBUG( "fong3", "converting " << (*vi)->name() << endl);
+            build_delegate(*vi, t);
+#if 0
 
             // Build the delegate; Get a FONg type for the given
             // DAP type.
@@ -288,9 +313,10 @@ static void look_for_vars(DDS *dds, FONgTransform &t)
 
             // Get the information needed for the transform
             fb->extract_coordinates(t);
+#endif
         }
         else if ((*vi)->type() == dods_structure_c) {
-            recursive_look_for_vars(static_cast<Structure*>(*vi), t);
+            find_vars_helper(static_cast<Structure*>(*vi), t);
         }
 
         ++vi;
@@ -304,21 +330,29 @@ static void look_for_vars(DDS *dds, FONgTransform &t)
  */
 void FONgTransform::transform()
 {
-    // Scan the entire DDS looking for variables that have been 'projected'.
-    look_for_vars(d_dds, *this);
+    // Scan the entire DDS looking for variables that have been 'projected' and
+    // build the delegate objects for them.
+    find_vars(d_dds, *this);
 
+#if 0
     if (num_bands() != 1)
         throw Error("GeoTiff responses can consist of one band only.");
 
-    // Hardcoded that there's only one variable when building a GeoTiff response
+    // Hard coded that there's only one variable when building a GeoTiff response
     if (!effectively_two_D(var(0)))
-        throw Error("GeoTiff responses can consist of one two-dimensional variable; use constraints to reduce he size of Grids and Arrays as needed.");
+        throw Error("GeoTiff responses can consist of one two-dimensional variable; use constraints to reduce the size of Grids as needed.");
+#else
+    for (int i = 0; i < num_bands(); ++i)
+        if (!effectively_two_D(var(i)))
+            throw Error("GeoTiff responses can consist of two-dimensional variables only; use constraints to reduce the size of Grids as needed.");
+#endif
 
     GDALAllRegister();
+    CPLSetErrorHandler(CPLQuietErrorHandler);
 
     GDALDriver *Driver = GetGDALDriverManager()->GetDriverByName("GTiff");
     if( Driver == NULL )
-        throw Error("Could not process request. (1)");
+        throw Error("Could not process request: " + string(CPLGetLastErrorMsg()));
 
     char **Metadata = Driver->GetMetadata();
     if (!CSLFetchBoolean(Metadata, GDAL_DCAP_CREATE, FALSE))
@@ -328,44 +362,63 @@ void FONgTransform::transform()
     // although the resulting files differ. jhrg 11/21/12
     char **options = NULL;
     options = CSLSetNameValue(options, "PHOTOMETRIC", "MINISBLACK" ); // The default for GDAL
-    d_dest = Driver->Create(d_localfile.c_str(), width(), height(), 1/*num_bands()*/, GDT_Float64, options);
+    d_dest = Driver->Create(d_localfile.c_str(), width(), height(), num_bands(), GDT_Float64, options);
     if (!d_dest)
-        throw Error("Could not process request.");
+        throw Error("Could not process request: " + string(CPLGetLastErrorMsg()));
 
     d_dest->SetGeoTransform(geo_transform());
+    // Take the mapping data from the first variable
+    // var(0)->get_projection(d_dds, d_dest);
 
-    FONgBaseType *fbtp = var(0);
+    BESDEBUG("fong3", "Made new temp file and set georeferencing (" << num_bands() << " vars)." << endl);
 
-    fbtp->set_projection(d_dds, d_dest);
+    bool projection_set = false;
+    string wkt = "";
+    for (int i = 0; i < num_bands(); ++i) {
+        FONgBaseType *fbtp = var(i);
 
-    BESDEBUG("fong3", "Made new temp file and set georeferencing (" << num_var() << " vars)." << endl);
+        if (!projection_set) {
+            wkt = var(i)->get_projection(d_dds);
+            if (d_dest->SetProjection(wkt.c_str()) != CPLE_None)
+                throw Error("Could not set the projection: " + string(CPLGetLastErrorMsg()));
+            projection_set = true;
+        }
+        else {
+            string wkt_i = var(i)->get_projection(d_dds);
+            if (wkt_i != wkt)
+                throw Error("In building a multiband response, different bands had different projection information.");
+        }
 
-    double *data = fbtp->get_data();
+        d_dest->AddBand(GDT_Float64, 0);
+        GDALRasterBand *band = d_dest->GetRasterBand(d_dest->GetRasterCount());
+        if (!band)
+            throw Error("Could not get the " + long_to_string(i) + "th band: " + string(CPLGetLastErrorMsg()));
 
-    try {
-        // hack the values; because the missing value used with many datasets
-        // is often really small it'll skew the mapping of values to the grayscale
-        // that GDAL performs. Move the no_data values to something closer to the
-        // other values in the dataset.
-        BESDEBUG("fong3", "no_data_type(): " << no_data_type() << endl);
-        if (no_data_type() != none)
-            m_scale_data(data);
+        try {
+            // TODO We can read any of the basic DAP2 types and let RasterIO convert it to any other type.
+            double *data = fbtp->get_data();
 
-        CPLErr error = d_dest->RasterIO(GF_Write, 0, 0, width(), height(),
-                data, width(), height(), GDT_Float64,
-                /*BandCount*/1, /*BandMap - 0 --> all bands*/0,
-                /*PixelSpace*/0, /*LineSpace*/0, /*BandSpace*/0);
+            // hack the values; because the missing value used with many datasets
+            // is often really small it'll skew the mapping of values to the grayscale
+            // that GDAL performs. Move the no_data values to something closer to the
+            // other values in the dataset.
+            BESDEBUG("fong3", "no_data_type(): " << no_data_type() << endl);
+            if (no_data_type() != none)
+                m_scale_data(data);
 
-        if (error != CPLE_None)
-            throw Error(CPLGetLastErrorMsg());
+            BESDEBUG("fong3", "calling band->RasterIO" << endl);
+            CPLErr error = band->RasterIO(GF_Write, 0, 0, width(), height(),
+                                          data, width(), height(), GDT_Float64, 0, 0);
+            delete[] data;
 
-        delete[] data;
-        GDALClose(d_dest);
+            if (error != CPLE_None)
+                throw Error(CPLGetLastErrorMsg());
+        }
+        catch (...) {
+            GDALClose(d_dest);
+            throw;
+        }
     }
-    catch (...) {
-        delete[] data;
-        GDALClose(d_dest);
 
-        throw;
-    }
+    GDALClose(d_dest);
 }
