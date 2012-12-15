@@ -29,7 +29,8 @@
 using std::endl;
 
 #include "FONgModule.h"
-#include "FONgTransmitter.h"
+#include "GeoTiffTransmitter.h"
+#include "JPEG2000Transmitter.h"
 #include "FONgRequestHandler.h"
 #include "BESRequestHandlerList.h"
 
@@ -42,6 +43,10 @@ using std::endl;
 #include <BESDebug.h>
 
 #define RETURNAS_GEOTIFF "geotiff"
+#define RETURNAS_JPEG2000 "jpeg2000"
+
+#define JP2 1
+
 
 /** @brief initialize the module by adding call backs and registering
  * objects with the framework
@@ -62,12 +67,20 @@ void FONgModule::initialize(const string &modname)
 
     BESDEBUG( "fong", "    adding " << RETURNAS_GEOTIFF << " transmitter" << endl );
 
-    BESReturnManager::TheManager()->add_transmitter(RETURNAS_GEOTIFF, new FONgTransmitter());
+    BESReturnManager::TheManager()->add_transmitter(RETURNAS_GEOTIFF, new GeoTiffTransmitter());
+#if JP2
+    BESDEBUG( "fong", "    adding " << RETURNAS_JPEG2000 << " transmitter" << endl );
 
-    BESDEBUG( "fong", "    adding fong service to dap" << endl );
+    BESReturnManager::TheManager()->add_transmitter(RETURNAS_JPEG2000, new JPEG2000Transmitter());
+#endif
+    BESDEBUG( "fong", "    adding geotiff service to dap" << endl );
 
     BESServiceRegistry::TheRegistry()->add_format(OPENDAP_SERVICE, DATA_SERVICE, RETURNAS_GEOTIFF);
+#if JP2
+    BESDEBUG( "fong", "    adding jpeg2000 service to dap" << endl );
 
+    BESServiceRegistry::TheRegistry()->add_format(OPENDAP_SERVICE, DATA_SERVICE, RETURNAS_JPEG2000);
+#endif
     // TODO Move to the top of the method?
     BESDebug::Register("fong");
 
@@ -88,6 +101,12 @@ void FONgModule::terminate(const string &modname)
     BESDEBUG( "fong", "    removing " << RETURNAS_GEOTIFF << " transmitter" << endl );
 
     BESReturnManager::TheManager()->del_transmitter(RETURNAS_GEOTIFF);
+
+#if JP2
+    BESDEBUG( "fong", "    removing " << RETURNAS_JPEG2000 << " transmitter" << endl );
+
+    BESReturnManager::TheManager()->del_transmitter(RETURNAS_JPEG2000);
+#endif
 
     BESDEBUG( "fong", "    removing " << modname << " request handler " << endl );
 

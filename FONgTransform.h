@@ -77,7 +77,8 @@ public:
     FONgTransform(libdap::DDS *dds, libdap::ConstraintEvaluator &evaluator, const string &localfile);
     virtual ~FONgTransform();
 
-    virtual void transform();
+    virtual void transform_to_geotiff();
+    virtual void transform_to_jpeg2000();
 
     bool is_geo_transform_set() { return d_geo_transform_set; }
     void geo_transform_set(bool state) { d_geo_transform_set = state; }

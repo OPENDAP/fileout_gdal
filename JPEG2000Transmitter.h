@@ -1,4 +1,4 @@
-// FONgTransmitter.h
+// JPEG2000Transmitter.h
 
 // This file is part of BES GDAL File Out Module
 
@@ -22,8 +22,8 @@
 // You can contact University Corporation for Atmospheric Research at
 // 3080 Center Green Drive, Boulder, CO 80301
 
-#ifndef A_FONgTransmitter_h
-#define A_FONgTransmitter_h 1
+#ifndef A_JPEG2000Transmitter_h
+#define A_JPEG2000Transmitter_h 1
 
 #include <BESBasicTransmitter.h>
 
@@ -32,27 +32,27 @@ class BESContainer;
 /** @brief BESTransmitter class named "geotiff" that transmits an OPeNDAP
  * data object as a geotiff file
  *
- * The FONgTransmitter transforms an OPeNDAP DataDDS object into a
+ * The JPEG2000Transmitter transforms an OPeNDAP DataDDS object into a
  * geotiff file and streams the new (temporary) geotiff file back to the
  * client.
  *
  * @see BESBasicTransmitter
  */
-class FONgTransmitter: public BESBasicTransmitter {
+class JPEG2000Transmitter: public BESBasicTransmitter {
 private:
     static void return_temp_stream(const string &filename, ostream &strm);
     static string temp_dir;
 
 
 public:
-    FONgTransmitter();
-    virtual ~FONgTransmitter()
+    JPEG2000Transmitter();
+    virtual ~JPEG2000Transmitter()
     {
     }
 
-    static void send_data(BESResponseObject *obj, BESDataHandlerInterface &dhi);
+    static void send_data_as_geotiff(BESResponseObject *obj, BESDataHandlerInterface &dhi);
 
     static string default_gcs;
 };
 
-#endif // A_FONgTransmitter_h
+#endif // A_JPEG2000Transmitter_h

@@ -53,9 +53,6 @@ public:
 
     virtual void extract_coordinates(FONgTransform &t) = 0;
 
-    /// deprecated
-    virtual void set_projection(libdap::DDS *dds, GDALDataset *dest) = 0;
-
     /// Get the GDAL/OGC WKT projection string
     virtual string get_projection(libdap::DDS *dds) = 0;
 

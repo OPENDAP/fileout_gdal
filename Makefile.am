@@ -4,6 +4,7 @@
 # 11/1/12 jhrg
 
 AUTOMAKE_OPTIONS = foreign check-news
+# DISABLE_STATIC
 
 ACLOCAL_AMFLAGS = -I conf
 
@@ -18,22 +19,12 @@ libfong_module_la_CPPFLAGS = $(BES_CPPFLAGS) $(GDAL_CFLAGS)
 libfong_module_la_LDFLAGS = -avoid-version -module 
 libfong_module_la_LIBADD = $(BES_DAP_LIBS) $(GDAL_LDFLAGS)
 
-FONG_SRC = FONgTransmitter.cc FONgRequestHandler.cc	\
+FONG_SRC = GeoTiffTransmitter.cc JPEG2000Transmitter.cc FONgRequestHandler.cc	\
 	FONgModule.cc FONgTransform.cc FONgBaseType.cc FONgGrid.cc
 	
-#	FONgStr.cc FONgShort.cc FONgInt.cc
-#	FONgFloat.cc FONgDouble.cc FONgStructure.cc FONgArray.cc
-#	 FONgSequence.cc FONgByte.cc 
-#	FONgDim.cc FONgMap.cc FONgAttributes.cc
-
-FONG_HDR = FONgTransmitter.h FONgRequestHandler.h	\
+FONG_HDR = GeoTiffTransmitter.h JPEG2000Transmitter.h FONgRequestHandler.h	\
 	FONgModule.h FONgTransform.h FONgBaseType.h FONgGrid.h
 	
-#	FONgStr.h FONgShort.h FONgInt.h
-#	FONgFloat.h FONgDouble.h FONgStructure.h FONgArray.h
-#	 FONgSequence.h FONgByte.h 
-#	FONgDim.h FONgMap.h FONgAttributes.h
-
 EXTRA_DIST = data COPYING fong.conf.in fileout_gdal.spec doxy.conf
 
 CLEANFILES = *~ fong.conf

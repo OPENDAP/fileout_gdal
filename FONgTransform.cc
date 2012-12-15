@@ -90,7 +90,7 @@ is_convertable_type(const BaseType *b)
         case dods_grid_c:
             return true;
 
-        // TODO Add support for Array
+        // TODO Add support for Array (?)
         case dods_array_c:
         default:
             return false;
@@ -108,11 +108,7 @@ static FONgBaseType *convert(BaseType *v)
     switch (v->type()) {
     case dods_grid_c:
         return  new FONgGrid(static_cast<Grid*>(v));
-#if 0
-    case dods_array_c:
-        b = new FONgArray(v);
-        break;
-#endif
+
     default:
         throw BESInternalError("file out GeoTiff, unable to write unknown variable type", __FILE__, __LINE__);
     }
@@ -275,15 +271,6 @@ static void find_vars_helper(Structure *s, FONgTransform &t)
     while (vi != s->var_end()) {
         if ((*vi)->send_p() && is_convertable_type(*vi)) {
             build_delegate(*vi, t);
-#if 0
-            BESDEBUG( "fong3", "converting " << (*vi)->name() << endl);
-
-            // Build the delegate
-            FONgBaseType *fb = convert(*vi);
-
-            // Get the information needed for the transform
-            fb->extract_coordinates(t);
-#endif
         }
         else if ((*vi)->type() == dods_structure_c) {
             find_vars_helper(static_cast<Structure*>(*vi), t);
@@ -305,15 +292,6 @@ static void find_vars(DDS *dds, FONgTransform &t)
         if ((*vi)->send_p() && is_convertable_type(*vi)) {
             BESDEBUG( "fong3", "converting " << (*vi)->name() << endl);
             build_delegate(*vi, t);
-#if 0
-
-            // Build the delegate; Get a FONg type for the given
-            // DAP type.
-            FONgBaseType *fb = convert(*vi);
-
-            // Get the information needed for the transform
-            fb->extract_coordinates(t);
-#endif
         }
         else if ((*vi)->type() == dods_structure_c) {
             find_vars_helper(static_cast<Structure*>(*vi), t);
@@ -323,29 +301,21 @@ static void find_vars(DDS *dds, FONgTransform &t)
     }
 }
 
-/** @brief Transforms each of the variables of the DataDDS to a GeoTiff file.
- * Scan the DDS for the dataset and find the one Grid (or Array when implemented)
- * that has been projected. Try to render it's content as a GeoTiff. The result
- * is a single-band GeoTiff grayscale photometric file.
+/** @brief Transforms the variables of the DataDDS to a GeoTiff file.
+ *
+ * Scan the DDS of the dataset and find the Grids that have been projected.
+ * Try to render their content as a GeoTiff. The result is a N-band GeoTiff
+ * file.
  */
-void FONgTransform::transform()
+void FONgTransform::transform_to_geotiff()
 {
     // Scan the entire DDS looking for variables that have been 'projected' and
     // build the delegate objects for them.
     find_vars(d_dds, *this);
 
-#if 0
-    if (num_bands() != 1)
-        throw Error("GeoTiff responses can consist of one band only.");
-
-    // Hard coded that there's only one variable when building a GeoTiff response
-    if (!effectively_two_D(var(0)))
-        throw Error("GeoTiff responses can consist of one two-dimensional variable; use constraints to reduce the size of Grids as needed.");
-#else
     for (int i = 0; i < num_bands(); ++i)
         if (!effectively_two_D(var(i)))
             throw Error("GeoTiff responses can consist of two-dimensional variables only; use constraints to reduce the size of Grids as needed.");
-#endif
 
     GDALAllRegister();
     CPLSetErrorHandler(CPLQuietErrorHandler);
@@ -365,6 +335,102 @@ void FONgTransform::transform()
     d_dest = Driver->Create(d_localfile.c_str(), width(), height(), num_bands(), GDT_Float64, options);
     if (!d_dest)
         throw Error("Could not process request: " + string(CPLGetLastErrorMsg()));
+
+    d_dest->SetGeoTransform(geo_transform());
+    // Take the mapping data from the first variable
+    // var(0)->get_projection(d_dds, d_dest);
+
+    BESDEBUG("fong3", "Made new temp file and set georeferencing (" << num_bands() << " vars)." << endl);
+
+    bool projection_set = false;
+    string wkt = "";
+    for (int i = 0; i < num_bands(); ++i) {
+        FONgBaseType *fbtp = var(i);
+
+        if (!projection_set) {
+            wkt = var(i)->get_projection(d_dds);
+            if (d_dest->SetProjection(wkt.c_str()) != CPLE_None)
+                throw Error("Could not set the projection: " + string(CPLGetLastErrorMsg()));
+            projection_set = true;
+        }
+        else {
+            string wkt_i = var(i)->get_projection(d_dds);
+            if (wkt_i != wkt)
+                throw Error("In building a multiband response, different bands had different projection information.");
+        }
+
+        d_dest->AddBand(GDT_Float64, 0);
+        GDALRasterBand *band = d_dest->GetRasterBand(d_dest->GetRasterCount());
+        if (!band)
+            throw Error("Could not get the " + long_to_string(i) + "th band: " + string(CPLGetLastErrorMsg()));
+
+        try {
+            // TODO We can read any of the basic DAP2 types and let RasterIO convert it to any other type.
+            double *data = fbtp->get_data();
+
+            // hack the values; because the missing value used with many datasets
+            // is often really small it'll skew the mapping of values to the grayscale
+            // that GDAL performs. Move the no_data values to something closer to the
+            // other values in the dataset.
+            BESDEBUG("fong3", "no_data_type(): " << no_data_type() << endl);
+            if (no_data_type() != none)
+                m_scale_data(data);
+
+            BESDEBUG("fong3", "calling band->RasterIO" << endl);
+            CPLErr error = band->RasterIO(GF_Write, 0, 0, width(), height(),
+                                          data, width(), height(), GDT_Float64, 0, 0);
+            delete[] data;
+
+            if (error != CPLE_None)
+                throw Error(CPLGetLastErrorMsg());
+        }
+        catch (...) {
+            GDALClose(d_dest);
+            throw;
+        }
+    }
+
+    GDALClose(d_dest);
+}
+
+/** @brief Transforms the variables of the DataDDS to a JPEG2000 file.
+ *
+ * Scan the DDS of the dataset and find the Grids that have been projected.
+ * Try to render their content as a JPEG2000. The result is a N-band JPEG2000
+ * file.
+ *
+ * @note This method is a copy of the transform_to_geotiff() method and most
+ * of the code here could be factored out. However, the real utility of this
+ * method will be in its ability to write GML for a GMLJP2 response... 12/14/12
+ */
+void FONgTransform::transform_to_jpeg2000()
+{
+    // Scan the entire DDS looking for variables that have been 'projected' and
+    // build the delegate objects for them.
+    find_vars(d_dds, *this);
+
+    for (int i = 0; i < num_bands(); ++i)
+        if (!effectively_two_D(var(i)))
+            throw Error("GeoTiff responses can consist of two-dimensional variables only; use constraints to reduce the size of Grids as needed.");
+
+    GDALAllRegister();
+    CPLSetErrorHandler(CPLQuietErrorHandler);
+
+    GDALDriver *Driver = GetGDALDriverManager()->GetDriverByName("JPEG2000");
+    if( Driver == NULL )
+        throw Error("Could not create dataset: " + string(CPLGetLastErrorMsg()));
+#if 0
+    char **Metadata = Driver->GetMetadata();
+    if (!CSLFetchBoolean(Metadata, GDAL_DCAP_CREATE, FALSE))
+        throw Error("Could not get driver metadata: " + string(CPLGetLastErrorMsg()));
+#endif
+    // NB: Changing PHOTOMETIC to MINISWHITE doesn't seem to have any visible affect,
+    // although the resulting files differ. jhrg 11/21/12
+    char **options = NULL;
+    options = CSLSetNameValue(options, "FORMAT", "JP2");
+    d_dest = Driver->Create(d_localfile.c_str(), width(), height(), num_bands(), GDT_Float64, options);
+    if (!d_dest)
+        throw Error("Could not set creation options: " + string(CPLGetLastErrorMsg()));
 
     d_dest->SetGeoTransform(geo_transform());
     // Take the mapping data from the first variable

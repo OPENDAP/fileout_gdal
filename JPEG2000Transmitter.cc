@@ -1,4 +1,4 @@
-// FONgTransmitter.cc
+// JPEG2000Transmitter.cc
 
 // This file is part of BES GDAL File Out Module
 
@@ -38,7 +38,7 @@
 
 using namespace libdap;
 
-#include "FONgTransmitter.h"
+#include "JPEG2000Transmitter.h"
 #include "FONgTransform.h"
 
 #include <BESInternalError.h>
@@ -50,13 +50,13 @@ using namespace libdap;
 
 #include <TheBESKeys.h>
 
-#define FONG_TEMP_DIR "/tmp"
-#define FONG_GCS "WGS84"
+#define JPEG2000_TEMP_DIR "/tmp"
+#define JPEG2000_GCS "WGS84"
 
-string FONgTransmitter::temp_dir;
-string FONgTransmitter::default_gcs;
+string JPEG2000Transmitter::temp_dir;
+string JPEG2000Transmitter::default_gcs;
 
-/** @brief Construct the FONgTransmitter, adding it with name geotiff to be
+/** @brief Construct the JPEG2000Transmitter, adding it with name geotiff to be
  * able to transmit a data response
  *
  * The transmitter is created to add the ability to return OPeNDAP data
@@ -64,40 +64,40 @@ string FONgTransmitter::default_gcs;
  *
  * The OPeNDAP data object is written to a geotiff file locally in a
  * temporary directory specified by the BES configuration parameter
- * FONg.Tempdir. If this variable is not found or is not set then it
- * defaults to the macro definition FONG_TEMP_DIR.
+ * JPEG2000.Tempdir. If this variable is not found or is not set then it
+ * defaults to the macro definition JPEG2000_TEMP_DIR.
  *
  * @note The mapping from a 'returnAs' of "geotiff" to this code
- * is made in the FONgModule class.
+ * is made in the JPEG2000Module class.
  *
- * @see FONgModule
+ * @see JPEG2000Module
  */
-FONgTransmitter::FONgTransmitter() :  BESBasicTransmitter()
+JPEG2000Transmitter::JPEG2000Transmitter() :  BESBasicTransmitter()
 {
     // DATA_SERVICE == "dods"
-    add_method(DATA_SERVICE, FONgTransmitter::send_data);
+    add_method(DATA_SERVICE, JPEG2000Transmitter::send_data_as_geotiff);
 
-    if (FONgTransmitter::temp_dir.empty()) {
+    if (JPEG2000Transmitter::temp_dir.empty()) {
         // Where is the temp directory for creating these files
         bool found = false;
-        string key = "FONg.Tempdir";
-        TheBESKeys::TheKeys()->get_value(key, FONgTransmitter::temp_dir, found);
-        if (!found || FONgTransmitter::temp_dir.empty()) {
-            FONgTransmitter::temp_dir = FONG_TEMP_DIR;
+        string key = "JPEG2000.Tempdir";
+        TheBESKeys::TheKeys()->get_value(key, JPEG2000Transmitter::temp_dir, found);
+        if (!found || JPEG2000Transmitter::temp_dir.empty()) {
+            JPEG2000Transmitter::temp_dir = JPEG2000_TEMP_DIR;
         }
-        string::size_type len = FONgTransmitter::temp_dir.length();
-        if (FONgTransmitter::temp_dir[len - 1] == '/') {
-            FONgTransmitter::temp_dir = FONgTransmitter::temp_dir.substr(0, len - 1);
+        string::size_type len = JPEG2000Transmitter::temp_dir.length();
+        if (JPEG2000Transmitter::temp_dir[len - 1] == '/') {
+            JPEG2000Transmitter::temp_dir = JPEG2000Transmitter::temp_dir.substr(0, len - 1);
         }
     }
 
-    if (FONgTransmitter::default_gcs.empty()) {
+    if (JPEG2000Transmitter::default_gcs.empty()) {
         // Use what as the default Geographic coordinate system?
         bool found = false;
-        string key = "FONg.Default_GCS";
-        TheBESKeys::TheKeys()->get_value(key, FONgTransmitter::default_gcs, found);
-        if (!found || FONgTransmitter::default_gcs.empty()) {
-            FONgTransmitter::default_gcs = FONG_GCS;
+        string key = "JPEG2000.Default_GCS";
+        TheBESKeys::TheKeys()->get_value(key, JPEG2000Transmitter::default_gcs, found);
+        if (!found || JPEG2000Transmitter::default_gcs.empty()) {
+            JPEG2000Transmitter::default_gcs = JPEG2000_GCS;
         }
     }
 }
@@ -117,7 +117,7 @@ FONgTransmitter::FONgTransmitter() :  BESBasicTransmitter()
  * there are any problems reading the data, writing to a netcdf file, or
  * streaming the netcdf file
  */
-void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface &dhi)
+void JPEG2000Transmitter::send_data_as_geotiff(BESResponseObject *obj, BESDataHandlerInterface &dhi)
 {
     BESDataDDSResponse *bdds = dynamic_cast<BESDataDDSResponse *>(obj);
     if (!bdds) {
@@ -138,7 +138,7 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
         throw pe;
     }
 
-    BESDEBUG("fong2", "FONgTransmitter::send_data - parsing the constraint" << endl);
+    BESDEBUG("JPEG20002", "JPEG2000Transmitter::send_data - parsing the constraint" << endl);
 
     // ticket 1248 jhrg 2/23/09
     string ce = www2id(dhi.data[POST_CONSTRAINT], "%", "%20%26");
@@ -156,11 +156,11 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
     }
 
     // now we need to read the data
-    BESDEBUG("fong2", "FONgTransmitter::send_data - reading data into DataDDS" << endl);
+    BESDEBUG("JPEG20002", "JPEG2000Transmitter::send_data - reading data into DataDDS" << endl);
 
     // Huh? Put the template for the temp file name in a char array. Use vector<char>
     // to avoid using new/delete.
-    string temp_file_name = FONgTransmitter::temp_dir + '/' + "geotiffXXXXXX";
+    string temp_file_name = JPEG2000Transmitter::temp_dir + '/' + "geotiffXXXXXX";
     vector<char> temp_file(temp_file_name.length() + 1);
     string::size_type len = temp_file_name.copy(&temp_file[0], temp_file_name.length());
     temp_file[len] = '\0';
@@ -177,17 +177,17 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
         throw BESInternalError("Failed to open the temporary file: " + temp_file_name, __FILE__, __LINE__);
 
     // transform the OPeNDAP DataDDS to the geotiff file
-    BESDEBUG("fong2", "FONgTransmitter::send_data - transforming into temporary file " << &temp_file[0] << endl);
+    BESDEBUG("JPEG20002", "JPEG2000Transmitter::send_data - transforming into temporary file " << &temp_file[0] << endl);
 
     try {
         FONgTransform ft(dds, bdds->get_ce(), &temp_file[0]);
 
         // transform() opens the temporary file, dumps data to it and closes it.
-        ft.transform();
+        ft.transform_to_jpeg2000();
 
-        BESDEBUG("fong2", "FONgTransmitter::send_data - transmitting temp file " << &temp_file[0] << endl );
+        BESDEBUG("JPEG20002", "JPEG2000Transmitter::send_data - transmitting temp file " << &temp_file[0] << endl );
 
-        FONgTransmitter::return_temp_stream(&temp_file[0], strm);
+        JPEG2000Transmitter::return_temp_stream(&temp_file[0], strm);
     }
     catch (BESError &e) {
         close(fd);
@@ -209,7 +209,7 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
     close(fd);
     (void) unlink(&temp_file[0]);
 
-    BESDEBUG("fong2", "FONgTransmitter::send_data - done transmitting to geotiff" << endl);
+    BESDEBUG("JPEG20002", "JPEG2000Transmitter::send_data - done transmitting to geotiff" << endl);
 }
 
 /** @brief stream the temporary file back to the requester
@@ -221,7 +221,7 @@ void FONgTransmitter::send_data(BESResponseObject *obj, BESDataHandlerInterface 
  * @param strm C++ ostream to write the contents of the file to
  * @throws BESInternalError if problem opening the file
  */
-void FONgTransmitter::return_temp_stream(const string &filename, ostream &strm)
+void JPEG2000Transmitter::return_temp_stream(const string &filename, ostream &strm)
 {
     ifstream os;
     os.open(filename.c_str(), ios::binary | ios::in);

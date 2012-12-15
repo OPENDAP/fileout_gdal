@@ -57,8 +57,6 @@ private:
     set<string> d_lat_names;
     set<string> d_lon_names;
 
-    bool d_three_dims;
-
     bool m_lat_unit_or_name_match(const string &var_units, const string &var_name, const string &long_name);
     bool m_lon_unit_or_name_match(const string &var_units, const string &var_name, const string &long_name);
 
@@ -70,10 +68,7 @@ public:
 
     bool find_lat_lon_maps();
 
-    bool three_dims() { return d_three_dims; }
-
     virtual void extract_coordinates(FONgTransform &t);
-    virtual void set_projection(libdap::DDS *dds, GDALDataset *dest);
     string get_projection(libdap::DDS *dds);
     virtual double *get_data();
 
