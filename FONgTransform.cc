@@ -61,7 +61,7 @@ using namespace libdap;
  */
 FONgTransform::FONgTransform(DDS *dds, ConstraintEvaluator &evaluator, const string &localfile) :
         d_dds(dds), d_evaluator(evaluator), d_localfile(localfile),
-        d_geo_transform_set(false), d_num_bands(0), d_no_data_type(none)
+        d_geo_transform_set(false), d_no_data_type(none), d_num_bands(0)
 {
     if (localfile.empty())
         throw BESInternalError("Empty local file name passed to constructor", __FILE__, __LINE__);
@@ -348,21 +348,25 @@ void FONgTransform::transform_to_geotiff()
         FONgBaseType *fbtp = var(i);
 
         if (!projection_set) {
-            wkt = var(i)->get_projection(d_dds);
+            wkt = fbtp->get_projection(d_dds);
             if (d_dest->SetProjection(wkt.c_str()) != CPLE_None)
                 throw Error("Could not set the projection: " + string(CPLGetLastErrorMsg()));
             projection_set = true;
         }
         else {
-            string wkt_i = var(i)->get_projection(d_dds);
+            string wkt_i = fbtp->get_projection(d_dds);
             if (wkt_i != wkt)
                 throw Error("In building a multiband response, different bands had different projection information.");
         }
-
+#if 0
         d_dest->AddBand(GDT_Float64, 0);
         GDALRasterBand *band = d_dest->GetRasterBand(d_dest->GetRasterCount());
         if (!band)
             throw Error("Could not get the " + long_to_string(i) + "th band: " + string(CPLGetLastErrorMsg()));
+#endif
+        GDALRasterBand *band = d_dest->GetRasterBand(i+1);
+        if (!band)
+            throw Error("Could not get the " + long_to_string(i+1) + "th band: " + string(CPLGetLastErrorMsg()));
 
         try {
             // TODO We can read any of the basic DAP2 types and let RasterIO convert it to any other type.
@@ -402,6 +406,10 @@ void FONgTransform::transform_to_geotiff()
  * @note This method is a copy of the transform_to_geotiff() method and most
  * of the code here could be factored out. However, the real utility of this
  * method will be in its ability to write GML for a GMLJP2 response... 12/14/12
+ *
+ * @note Since the available GMLJP2 drivers for GDAL only support making
+ * files using the CreateCopy() mathod, we make a MEM dataset, load it with data
+ * and then use that to make GMLJP2 file.
  */
 void FONgTransform::transform_to_jpeg2000()
 {
@@ -416,25 +424,21 @@ void FONgTransform::transform_to_jpeg2000()
     GDALAllRegister();
     CPLSetErrorHandler(CPLQuietErrorHandler);
 
-    GDALDriver *Driver = GetGDALDriverManager()->GetDriverByName("JPEG2000");
+    GDALDriver *Driver = GetGDALDriverManager()->GetDriverByName("MEM");
     if( Driver == NULL )
-        throw Error("Could not create dataset: " + string(CPLGetLastErrorMsg()));
-#if 0
+        throw Error("Could not get driver for MEM: " + string(CPLGetLastErrorMsg()));
+
     char **Metadata = Driver->GetMetadata();
     if (!CSLFetchBoolean(Metadata, GDAL_DCAP_CREATE, FALSE))
-        throw Error("Could not get driver metadata: " + string(CPLGetLastErrorMsg()));
-#endif
-    // NB: Changing PHOTOMETIC to MINISWHITE doesn't seem to have any visible affect,
-    // although the resulting files differ. jhrg 11/21/12
-    char **options = NULL;
-    options = CSLSetNameValue(options, "FORMAT", "JP2");
-    d_dest = Driver->Create(d_localfile.c_str(), width(), height(), num_bands(), GDT_Float64, options);
+        throw Error("Driver JP2OpenJPEG does not support dataset creation.");
+
+    // No creation options for a memory dataset
+    // NB: This is where the type of the bands is set. JPEG2000 only supports integer types.
+    d_dest = Driver->Create("in_memory_dataset", width(), height(), num_bands(), GDT_Int32, 0 /*options*/);
     if (!d_dest)
-        throw Error("Could not set creation options: " + string(CPLGetLastErrorMsg()));
+        throw Error("Could not create in-memory dataset: " + string(CPLGetLastErrorMsg()));
 
     d_dest->SetGeoTransform(geo_transform());
-    // Take the mapping data from the first variable
-    // var(0)->get_projection(d_dds, d_dest);
 
     BESDEBUG("fong3", "Made new temp file and set georeferencing (" << num_bands() << " vars)." << endl);
 
@@ -444,21 +448,20 @@ void FONgTransform::transform_to_jpeg2000()
         FONgBaseType *fbtp = var(i);
 
         if (!projection_set) {
-            wkt = var(i)->get_projection(d_dds);
+            wkt = fbtp->get_projection(d_dds);
             if (d_dest->SetProjection(wkt.c_str()) != CPLE_None)
                 throw Error("Could not set the projection: " + string(CPLGetLastErrorMsg()));
             projection_set = true;
         }
         else {
-            string wkt_i = var(i)->get_projection(d_dds);
+            string wkt_i = fbtp->get_projection(d_dds);
             if (wkt_i != wkt)
                 throw Error("In building a multiband response, different bands had different projection information.");
         }
 
-        d_dest->AddBand(GDT_Float64, 0);
-        GDALRasterBand *band = d_dest->GetRasterBand(d_dest->GetRasterCount());
+        GDALRasterBand *band = d_dest->GetRasterBand(i+1);
         if (!band)
-            throw Error("Could not get the " + long_to_string(i) + "th band: " + string(CPLGetLastErrorMsg()));
+            throw Error("Could not get the " + long_to_string(i+1) + "th band: " + string(CPLGetLastErrorMsg()));
 
         try {
             // TODO We can read any of the basic DAP2 types and let RasterIO convert it to any other type.
@@ -473,6 +476,9 @@ void FONgTransform::transform_to_jpeg2000()
                 m_scale_data(data);
 
             BESDEBUG("fong3", "calling band->RasterIO" << endl);
+
+            // NB: Here the 'type' value indicates the type of data in the buffer. The
+            // type of the band is set above when the dataset is created.
             CPLErr error = band->RasterIO(GF_Write, 0, 0, width(), height(),
                                           data, width(), height(), GDT_Float64, 0, 0);
             delete[] data;
@@ -486,5 +492,41 @@ void FONgTransform::transform_to_jpeg2000()
         }
     }
 
+    // Now get the OpenJPEG driver and use CreateCopy() on the d_dest "MEM" dataset
+    GDALDataset *jpeg_dst = 0;
+    try {
+        Driver = GetGDALDriverManager()->GetDriverByName("JP2OpenJPEG");
+        if (Driver == NULL)
+            throw Error("Could not get driver for JP2OpenJPEG: " + string(CPLGetLastErrorMsg()));
+
+        // The JPEG2000 drivers only support CreateCopy()
+        char **Metadata = Driver->GetMetadata();
+        if (!CSLFetchBoolean(Metadata, GDAL_DCAP_CREATECOPY, FALSE))
+            BESDEBUG("fong", "Driver JP2OpenJPEG does not support dataset creation via 'CreateCopy()'." << endl);
+        //throw Error("Driver JP2OpenJPEG does not support dataset creation via 'CreateCopy()'.");
+
+        char **options = NULL;
+        options = CSLSetNameValue(options, "CODEC", "JP2");
+        options = CSLSetNameValue(options, "GMLJP2", "YES");
+        options = CSLSetNameValue(options, "GeoJP2", "NO");
+        options = CSLSetNameValue(options, "QUALITY", "100"); // 25 is the default;
+        options = CSLSetNameValue(options, "REVERSIBLE", "YES"); // lossy compression
+
+        BESDEBUG("fong3", "Before JPEG2000 CreateCopy, number of bands: " << d_dest->GetRasterCount() << endl);
+
+        jpeg_dst = Driver->CreateCopy(d_localfile.c_str(), d_dest, FALSE/*strict*/,
+                options, NULL/*progress*/, NULL/*progress data*/);
+
+        if (!jpeg_dst)
+            throw Error("Could not create the JPEG200 dataset: " + string(CPLGetLastErrorMsg()));
+    }
+    catch (...) {
+        GDALClose(d_dest);
+        GDALClose (jpeg_dst);
+        throw;
+    }
+
     GDALClose(d_dest);
+    GDALClose(jpeg_dst);
+
 }

@@ -46,7 +46,7 @@ public:
     virtual ~FONgBaseType() {}
 
     virtual string name() { return d_name; }
-    virtual string set_name(const string &n) { d_name = n; }
+    virtual void set_name(const string &n) { d_name = n; }
 
     virtual libdap::Type type() { return d_type; }
     virtual void set_type(libdap::Type t) { d_type = t; }
@@ -59,7 +59,7 @@ public:
     ///Get the data values for the band(s). Call must delete.
     virtual double *get_data() = 0;
 
-    virtual void dump(ostream &strm) const {};
+    virtual void dump(ostream &) const {};
 };
 
 #endif // FONgBaseType_h_

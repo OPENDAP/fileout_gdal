@@ -70,9 +70,11 @@ AC_ARG_WITH(gdal, AS_HELP_STRING([--with-gdal], [Use the copy of GDAL at this lo
 if test -n "$with_gdal_prefix" -a -x $with_gdal_prefix/bin/gdal-config
 then
     AC_MSG_NOTICE([Using $with_gdal_prefix as the GDAL prefix directory.])
-    GDAL_LDFLAGS="`$with_gdal_prefix/bin/gdal-config --libs`"
+    GDAL_LDFLAGS="`$with_gdal_prefix/bin/gdal-config --libs` `$with_gdal_prefix/bin/gdal-config --dep-libs`"
     GDAL_CFLAGS="`$with_gdal_prefix/bin/gdal-config --cflags`"
     GDAL_FOUND="yes"
+    
+    AC_MSG_NOTICE([Set GDAL_LDFLAGS to $GDAL_LDFLAGS.])
 elif test -n "$with_gdal_prefix"
 then
     AC_MSG_ERROR([You set the gdal-prefix directory to $with_gdal_prefix, but gdal-config is not there.])
@@ -80,6 +82,7 @@ fi
 
 if test -z "$GDAL_FOUND"
 then
+    AC_MSG_NOTICE([Looking for GDAL.])
     AX_LIB_GDAL([1.9.0])
     if test ! -z "$GDAL_CFLAGS" -a ! -z "$GDAL_LDFLAGS"; then
         GDAL_FOUND="yes"
@@ -90,6 +93,27 @@ if test -z "$GDAL_FOUND"
 then
     AC_MSG_ERROR([I could not find GDAL.])
 fi
+
+# Which copy of OpenJPEG should be used for the build?
+OPENJPEG_FOUND=
+
+AC_ARG_WITH(openjpeg, AS_HELP_STRING([--with-openjpeg], [Use the copy of openjpeg at this location]),
+            with_openjpeg_prefix="$withval", with_openjpeg_prefix="")
+
+if test -n "$with_openjpeg_prefix" -a -d "$with_openjpeg_prefix/lib"
+then
+    AC_MSG_NOTICE([Using $with_openjpeg_prefix as the openjpeg prefix directory.])
+    OPENJPEG_LDFLAGS="-L$with_openjpeg_prefix/lib -lopenjp2"
+    OPENJPEG_FOUND="yes"
+elif test -n "$with_openjpeg_prefix"
+then
+    AC_MSG_ERROR([You set the openjpeg-prefix directory to $with_openjpeg_prefix, but there is no 'lib' directory there.])
+fi
+
+# if test -z "$OPENJPEG_FOUND"
+# then
+#   AC_MSG_ERROR([I could not find OPENJPEG.])
+# fi
 
 AC_ARG_ENABLE([developer],
 [AS_HELP_STRING([--enable-developer],

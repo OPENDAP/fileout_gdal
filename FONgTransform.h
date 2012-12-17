@@ -120,7 +120,7 @@ public:
 
     virtual double *geo_transform();
 
-    virtual void dump(ostream &strm) const {}
+    virtual void dump(ostream &) const {}
 };
 
 #endif // FONgTransfrom_h_
