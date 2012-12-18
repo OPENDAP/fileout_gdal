@@ -322,7 +322,7 @@ void FONgTransform::transform_to_geotiff()
 
     GDALDriver *Driver = GetGDALDriverManager()->GetDriverByName("GTiff");
     if( Driver == NULL )
-        throw Error("Could not process request: " + string(CPLGetLastErrorMsg()));
+        throw Error("Could not get the GTiff driver from/for GDAL: " + string(CPLGetLastErrorMsg()));
 
     char **Metadata = Driver->GetMetadata();
     if (!CSLFetchBoolean(Metadata, GDAL_DCAP_CREATE, FALSE))
@@ -334,7 +334,7 @@ void FONgTransform::transform_to_geotiff()
     options = CSLSetNameValue(options, "PHOTOMETRIC", "MINISBLACK" ); // The default for GDAL
     d_dest = Driver->Create(d_localfile.c_str(), width(), height(), num_bands(), GDT_Float64, options);
     if (!d_dest)
-        throw Error("Could not process request: " + string(CPLGetLastErrorMsg()));
+        throw Error("Could not create the geotiff dataset: " + string(CPLGetLastErrorMsg()));
 
     d_dest->SetGeoTransform(geo_transform());
     // Take the mapping data from the first variable
@@ -386,7 +386,7 @@ void FONgTransform::transform_to_geotiff()
             delete[] data;
 
             if (error != CPLE_None)
-                throw Error(CPLGetLastErrorMsg());
+                throw Error("Could not write data for band: " + long_to_string(i+1) + ": " + string(CPLGetLastErrorMsg()));
         }
         catch (...) {
             GDALClose(d_dest);
@@ -426,7 +426,7 @@ void FONgTransform::transform_to_jpeg2000()
 
     GDALDriver *Driver = GetGDALDriverManager()->GetDriverByName("MEM");
     if( Driver == NULL )
-        throw Error("Could not get driver for MEM: " + string(CPLGetLastErrorMsg()));
+        throw Error("Could not get the MEM driver from/for GDAL: " + string(CPLGetLastErrorMsg()));
 
     char **Metadata = Driver->GetMetadata();
     if (!CSLFetchBoolean(Metadata, GDAL_DCAP_CREATE, FALSE))
