@@ -180,6 +180,36 @@ void JPEG2000Transmitter::send_data_as_geotiff(BESResponseObject *obj, BESDataHa
     BESDEBUG("JPEG20002", "JPEG2000Transmitter::send_data - transforming into temporary file " << &temp_file[0] << endl);
 
     try {
+        // Handle *functional* constraint expressions specially
+        if (bdds->get_ce().function_clauses()) {
+            BESDEBUG("fonc", "processing a functional constraint clause(s)." << endl);
+            dds = bdds->get_ce().eval_function_clauses(*dds);
+        }
+        else
+        {
+            // Iterate through the variables in the DataDDS and read
+            // in the data if the variable has the send flag set.
+
+            // Note the special case for Sequence. The
+            // transfer_data() method uses the same logic as
+            // serialize() to read values but transfers them to the
+            // d_values field instead of writing them to a XDR sink
+            // pointer. jhrg 9/13/06
+            for (DDS::Vars_iter i = dds->var_begin(); i != dds->var_end(); i++) {
+                if ((*i)->send_p()) {
+                    (*i)->intern_data(bdds->get_ce(), *dds);
+                }
+            }
+        }
+    }
+    catch (Error &e) {
+        throw BESInternalError("Failed to read data: " + e.get_error_message(), __FILE__, __LINE__);
+    }
+    catch (...) {
+        throw BESInternalError("Failed to read data: Unknown exception caught", __FILE__, __LINE__);
+    }
+
+    try {
         FONgTransform ft(dds, bdds->get_ce(), &temp_file[0]);
 
         // transform() opens the temporary file, dumps data to it and closes it.
