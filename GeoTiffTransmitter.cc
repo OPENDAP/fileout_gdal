@@ -158,6 +158,36 @@ void GeoTiffTransmitter::send_data_as_geotiff(BESResponseObject *obj, BESDataHan
     // now we need to read the data
     BESDEBUG("fong2", "GeoTiffTransmitter::send_data - reading data into DataDDS" << endl);
 
+    try {
+        // Handle *functional* constraint expressions specially
+        if (bdds->get_ce().function_clauses()) {
+            BESDEBUG("fonc", "processing a functional constraint clause(s)." << endl);
+            dds = bdds->get_ce().eval_function_clauses(*dds);
+        }
+        else
+        {
+            // Iterate through the variables in the DataDDS and read
+            // in the data if the variable has the send flag set.
+
+            // Note the special case for Sequence. The
+            // transfer_data() method uses the same logic as
+            // serialize() to read values but transfers them to the
+            // d_values field instead of writing them to a XDR sink
+            // pointer. jhrg 9/13/06
+            for (DDS::Vars_iter i = dds->var_begin(); i != dds->var_end(); i++) {
+                if ((*i)->send_p()) {
+                    (*i)->intern_data(bdds->get_ce(), *dds);
+                }
+            }
+        }
+    }
+    catch (Error &e) {
+        throw BESInternalError("Failed to read data: " + e.get_error_message(), __FILE__, __LINE__);
+    }
+    catch (...) {
+        throw BESInternalError("Failed to read data: Unknown exception caught", __FILE__, __LINE__);
+    }
+
     // Huh? Put the template for the temp file name in a char array. Use vector<char>
     // to avoid using new/delete.
     string temp_file_name = GeoTiffTransmitter::temp_dir + '/' + "geotiffXXXXXX";

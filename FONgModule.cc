@@ -66,24 +66,22 @@ void FONgModule::initialize(const string &modname)
     BESRequestHandlerList::TheList()->add_handler(modname, handler);
 
     BESDEBUG( "fong", "    adding " << RETURNAS_GEOTIFF << " transmitter" << endl );
-
     BESReturnManager::TheManager()->add_transmitter(RETURNAS_GEOTIFF, new GeoTiffTransmitter());
+
 #if JP2
     BESDEBUG( "fong", "    adding " << RETURNAS_JPEG2000 << " transmitter" << endl );
-
     BESReturnManager::TheManager()->add_transmitter(RETURNAS_JPEG2000, new JPEG2000Transmitter());
 #endif
-    BESDEBUG( "fong", "    adding geotiff service to dap" << endl );
 
+    BESDEBUG( "fong", "    adding geotiff service to dap" << endl );
     BESServiceRegistry::TheRegistry()->add_format(OPENDAP_SERVICE, DATA_SERVICE, RETURNAS_GEOTIFF);
 #if JP2
-    BESDEBUG( "fong", "    adding jpeg2000 service to dap" << endl );
 
+    BESDEBUG( "fong", "    adding jpeg2000 service to dap" << endl );
     BESServiceRegistry::TheRegistry()->add_format(OPENDAP_SERVICE, DATA_SERVICE, RETURNAS_JPEG2000);
 #endif
-    // TODO Move to the top of the method?
-    BESDebug::Register("fong");
 
+    BESDebug::Register("fong");
     BESDEBUG( "fong", "Done Initializing module " << modname << endl );
 }
 
@@ -104,7 +102,6 @@ void FONgModule::terminate(const string &modname)
 
 #if JP2
     BESDEBUG( "fong", "    removing " << RETURNAS_JPEG2000 << " transmitter" << endl );
-
     BESReturnManager::TheManager()->del_transmitter(RETURNAS_JPEG2000);
 #endif
 

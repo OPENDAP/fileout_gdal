@@ -289,6 +289,7 @@ static void find_vars(DDS *dds, FONgTransform &t)
 {
     DDS::Vars_iter vi = dds->var_begin();
     while (vi != dds->var_end()) {
+        BESDEBUG( "fong3", "looking at: " << (*vi)->name() << " and it is/isn't selected: " << (*vi)->send_p() << endl);
         if ((*vi)->send_p() && is_convertable_type(*vi)) {
             BESDEBUG( "fong3", "converting " << (*vi)->name() << endl);
             build_delegate(*vi, t);
@@ -327,6 +328,8 @@ void FONgTransform::transform_to_geotiff()
     char **Metadata = Driver->GetMetadata();
     if (!CSLFetchBoolean(Metadata, GDAL_DCAP_CREATE, FALSE))
         throw Error("Could not make output format.");
+
+    BESDEBUG("fong3", "num_bands: " << num_bands() << "." << endl);
 
     // NB: Changing PHOTOMETIC to MINISWHITE doesn't seem to have any visible affect,
     // although the resulting files differ. jhrg 11/21/12
