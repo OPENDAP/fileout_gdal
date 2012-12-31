@@ -33,7 +33,7 @@
 									<listOptionValue builtIn="false" value="/Users/jimg/src/hyrax_1.8_release/include"/>
 									<listOptionValue builtIn="false" value="/Users/jimg/src/hyrax_1.8_release/include/bes"/>
 									<listOptionValue builtIn="false" value="/Users/jimg/src/hyrax_1.8_release/include/libdap"/>
-									<listOptionValue builtIn="false" value="/Users/jimg/src/hyrax_1.8_release/deps/gdal-1.9.2/include"/>
+									<listOptionValue builtIn="false" value="/Users/jimg/src/hyrax_1.8_release/deps/gdal-12.15.12/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.138512007" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
