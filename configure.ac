@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT(fileout_gdal, 0.9.0, opendap-tech@opendap.org)
+AC_INIT(fileout_gdal, 0.9.1, opendap-tech@opendap.org)
 AC_CONFIG_AUX_DIR([conf])
 AC_CONFIG_MACRO_DIR([conf])
 
@@ -110,10 +110,14 @@ then
     AC_MSG_ERROR([You set the openjpeg-prefix directory to $with_openjpeg_prefix, but there is no 'lib' directory there.])
 fi
 
-# if test -z "$OPENJPEG_FOUND"
-# then
-#   AC_MSG_ERROR([I could not find OPENJPEG.])
-# fi
+AM_CONDITIONAL([OPENJPEG_FOUND], [test "x$OPENJPEG_FOUND" = "xyes"])
+
+if test -z "$OPENJPEG_FOUND"
+then
+  AC_MSG_NOTICE([I could not find OPENJPEG, not building GMLJP2 support.])
+else
+  AC_MSG_NOTICE([Found OPENJPEG; building GMLJP2 support.])
+fi
 
 AC_ARG_ENABLE([developer],
 [AS_HELP_STRING([--enable-developer],

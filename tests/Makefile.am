@@ -8,8 +8,12 @@ else
 TESTSUITE_JP2 = 
 endif
 
-EXTRA_DIST = $(TESTSUITE_TIF).at $(TESTSUITE_TIF) $(TESTSUITE_JP2).at $(TESTSUITE_JP2) \
-	package.m4.in $(srcdir)/package.m4 atlocal.in template.bescmd.in bes.conf.in gdal
+EXTRA_DIST = $(TESTSUITE_TIF).at $(TESTSUITE_TIF) \
+    package.m4.in $(srcdir)/package.m4 atlocal.in bes.conf.in gdal
+
+if OPENJPEG_FOUND
+EXTRA_DIST += $(TESTSUITE_JP2).at $(TESTSUITE_JP2)
+endif
 
 noinst_DATA = bes.conf
 DISTCLEANFILES = bes.conf
