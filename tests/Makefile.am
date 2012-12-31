@@ -1,19 +1,26 @@
 AUTOMAKE_OPTIONS = foreign
 
-TESTSUITE = $(srcdir)/testsuite
+TESTSUITE_TIF = $(srcdir)/testsuite_tif
 
-EXTRA_DIST = testsuite.at package.m4.in $(TESTSUITE) $(srcdir)/package.m4 \
-        atlocal.in template.bescmd.in bes.conf.in gdal
+if OPENJPEG_FOUND
+TESTSUITE_JP2 = $(srcdir)/testsuite_jp2
+else
+TESTSUITE_JP2 = 
+endif
+
+EXTRA_DIST = $(TESTSUITE_TIF).at $(TESTSUITE_TIF) $(TESTSUITE_JP2).at $(TESTSUITE_JP2) \
+	package.m4.in $(srcdir)/package.m4 atlocal.in template.bescmd.in bes.conf.in gdal
 
 noinst_DATA = bes.conf
 DISTCLEANFILES = bes.conf
 
-check-local: atconfig atlocal $(TESTSUITE)
-	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
+check-local: atconfig atlocal $(TESTSUITE_TIF) $(TESTSUITE_JP2)
+	$(SHELL) '$(TESTSUITE_TIF)' $(TESTSUITE_TIFFLAGS)
+	test ! -f '$(TESTSUITE_JP2)' || $(SHELL) '$(TESTSUITE_JP2)' $(TESTSUITE_TIFFLAGS)
 
 clean-local:
-	test ! -f '$(TESTSUITE)' || \
-	$(SHELL) '$(TESTSUITE)' --clean
+	test ! -f '$(TESTSUITE_TIF)' || $(SHELL) '$(TESTSUITE_TIF)' --clean
+	test ! -f '$(TESTSUITE_JP2)' || $(SHELL) '$(TESTSUITE_JP2)' --clean
 
 distclean-local:
 	-rm atconfig
@@ -24,7 +31,7 @@ distclean-local:
 AUTOM4TE = $(SHELL) $(top_srcdir)/conf/missing --run autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 
-$(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 bes.conf
+$(TESTSUITE_TIF): $(srcdir)/testsuite_tif.at $(srcdir)/package.m4 bes.conf
 	$(AUTOTEST) -I '$(srcdir)' -o ${srcdir}/$@.tmp $@.at
 	mv ${srcdir}/$@.tmp ${srcdir}/$@
 
