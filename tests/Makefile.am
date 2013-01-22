@@ -35,7 +35,11 @@ distclean-local:
 AUTOM4TE = $(SHELL) $(top_srcdir)/conf/missing --run autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 
-$(TESTSUITE_TIF): $(srcdir)/testsuite_tif.at $(srcdir)/package.m4 bes.conf
+$(TESTSUITE_TIF): $(TESTSUITE_TIF).at $(srcdir)/package.m4 bes.conf
+	$(AUTOTEST) -I '$(srcdir)' -o ${srcdir}/$@.tmp $@.at
+	mv ${srcdir}/$@.tmp ${srcdir}/$@
+
+$(TESTSUITE_JP2): $(TESTSUITE_JP2).at $(srcdir)/package.m4 bes.conf
 	$(AUTOTEST) -I '$(srcdir)' -o ${srcdir}/$@.tmp $@.at
 	mv ${srcdir}/$@.tmp ${srcdir}/$@
 

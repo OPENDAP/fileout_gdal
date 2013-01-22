@@ -50,7 +50,7 @@ public:
     {
     }
 
-    static void send_data_as_geotiff(BESResponseObject *obj, BESDataHandlerInterface &dhi);
+    static void send_data_as_jp2(BESResponseObject *obj, BESDataHandlerInterface &dhi);
 
     static string default_gcs;
 };

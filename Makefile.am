@@ -21,10 +21,10 @@ libfong_module_la_LIBADD = $(BES_DAP_LIBS) $(GDAL_LDFLAGS)
 
 FONG_SRC = GeoTiffTransmitter.cc JPEG2000Transmitter.cc FONgRequestHandler.cc	\
 	FONgModule.cc FONgTransform.cc FONgBaseType.cc FONgGrid.cc
-	
+
 FONG_HDR = GeoTiffTransmitter.h JPEG2000Transmitter.h FONgRequestHandler.h	\
 	FONgModule.h FONgTransform.h FONgBaseType.h FONgGrid.h
-	
+
 EXTRA_DIST = data COPYING fong.conf.in fileout_gdal.spec doxy.conf
 
 CLEANFILES = *~ fong.conf

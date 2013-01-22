@@ -75,7 +75,7 @@ string JPEG2000Transmitter::default_gcs;
 JPEG2000Transmitter::JPEG2000Transmitter() :  BESBasicTransmitter()
 {
     // DATA_SERVICE == "dods"
-    add_method(DATA_SERVICE, JPEG2000Transmitter::send_data_as_geotiff);
+    add_method(DATA_SERVICE, JPEG2000Transmitter::send_data_as_jp2);
 
     if (JPEG2000Transmitter::temp_dir.empty()) {
         // Where is the temp directory for creating these files
@@ -117,7 +117,7 @@ JPEG2000Transmitter::JPEG2000Transmitter() :  BESBasicTransmitter()
  * there are any problems reading the data, writing to a netcdf file, or
  * streaming the netcdf file
  */
-void JPEG2000Transmitter::send_data_as_geotiff(BESResponseObject *obj, BESDataHandlerInterface &dhi)
+void JPEG2000Transmitter::send_data_as_jp2(BESResponseObject *obj, BESDataHandlerInterface &dhi)
 {
     BESDataDDSResponse *bdds = dynamic_cast<BESDataDDSResponse *>(obj);
     if (!bdds) {
@@ -160,7 +160,7 @@ void JPEG2000Transmitter::send_data_as_geotiff(BESResponseObject *obj, BESDataHa
 
     // Huh? Put the template for the temp file name in a char array. Use vector<char>
     // to avoid using new/delete.
-    string temp_file_name = JPEG2000Transmitter::temp_dir + '/' + "geotiffXXXXXX";
+    string temp_file_name = JPEG2000Transmitter::temp_dir + '/' + "jp2XXXXXX";
     vector<char> temp_file(temp_file_name.length() + 1);
     string::size_type len = temp_file_name.copy(&temp_file[0], temp_file_name.length());
     temp_file[len] = '\0';
@@ -233,13 +233,13 @@ void JPEG2000Transmitter::send_data_as_geotiff(BESResponseObject *obj, BESDataHa
     catch (...) {
         close(fd);
         (void) unlink(&temp_file[0]);
-        throw BESInternalError("Fileout GeoTiff, was not able to transform to geotiff, unknown error", __FILE__, __LINE__);
+        throw BESInternalError("Fileout GeoTiff, was not able to transform to jp2, unknown error", __FILE__, __LINE__);
     }
 
     close(fd);
     (void) unlink(&temp_file[0]);
 
-    BESDEBUG("JPEG20002", "JPEG2000Transmitter::send_data - done transmitting to geotiff" << endl);
+    BESDEBUG("JPEG20002", "JPEG2000Transmitter::send_data - done transmitting to jp2" << endl);
 }
 
 /** @brief stream the temporary file back to the requester
@@ -273,7 +273,7 @@ void JPEG2000Transmitter::return_temp_stream(const string &filename, ostream &st
         strm << "HTTP/1.0 200 OK\n";
         strm << "Content-type: application/octet-stream\n";
         strm << "Content-Description: " << "BES dataset" << "\n";
-        strm << "Content-Disposition: filename=" << filename << ".tif;\n\n";
+        strm << "Content-Disposition: filename=" << filename << ".jp2;\n\n";
         strm << flush;
     }
     strm.write(block, nbytes);
