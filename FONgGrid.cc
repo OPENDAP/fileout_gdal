@@ -31,7 +31,7 @@
 
 #include <DDS.h>
 #include <Grid.h>
-#include <ce_functions.h>
+// #include <ce_functions.h>
 #include <util.h>
 
 #include "GeoTiffTransmitter.h"
