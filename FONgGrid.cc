@@ -22,8 +22,7 @@
 // You can contact University Corporation for Atmospheric Research at
 // 3080 Center Green Drive, Boulder, CO 80301
 
-#include <BESInternalError.h>
-#include <BESDebug.h>
+#include <algorithm>
 
 #include <gdal.h>
 #include <gdal_priv.h>
@@ -33,6 +32,9 @@
 #include <Grid.h>
 // #include <ce_functions.h>
 #include <util.h>
+
+#include <BESInternalError.h>
+#include <BESDebug.h>
 
 #include "GeoTiffTransmitter.h"
 #include "FONgTransform.h"
