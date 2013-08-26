@@ -1,6 +1,6 @@
 Summary: Return a GeoTiff, JP2k, etc., File for a DAP Data response
 Name: fileout_gdal
-Version: 0.9.0
+Version: 0.9.1
 Release: 1
 License: LGPLv2+
 Group: System Environment/Daemons
@@ -46,7 +46,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_sysconfdir}/bes/modules
 %config(noreplace) %{_sysconfdir}/bes/modules/fong.conf
 %{_libdir}/bes/libfong_module.so
-%doc COPYING COPYRIGHT NEWS README
+%doc COPYING NEWS README
 
 %changelog
 * Tue Nov 20 2012 James Gallagher <jgallagher@opendap.org> - 
