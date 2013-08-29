@@ -6,14 +6,14 @@ License: LGPLv2+
 Group: System Environment/Daemons
 URL: http://www.opendap.org/
 Source0: http://www.opendap.org/pub/source/%{name}-%{version}.tar.gz
-Requires: libdap >= 3.11.0
-# Requires: netcdf >= 3.6
-Requires: bes >= 3.11.0
+Requires:        libdap >= 3.11.0
+Requires:        bes >= 3.11.0
+Requires:        libgdal >= 1.8
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:   libdap-devel >= 3.11.0
-# BuildRequires:   netcdf-devel >= 3.6
 BuildRequires:   bes-devel >= 3.11.0
+BuildRequires:   libgdal-devel >= 1.10
 
 %description
 This is the fileout GDAL response handler for Hyrax - the OPeNDAP data
