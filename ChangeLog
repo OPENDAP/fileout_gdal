@@ -1,3 +1,118 @@
+2013-08-29  James Gallagher <jgallagher@opendap.org>
+
+	RPM fixes
+
+	M    fileout_gdal/fileout_gdal.spec
+	M    gdal_handler/gdal_handler.spec
+
+2013-08-26  James Gallagher <jgallagher@opendap.org>
+
+	Removed COPYRIGHT file from .spec (it does not exist)
+
+	M    fileout_gdal.spec
+
+2013-05-03  James Gallagher <jgallagher@opendap.org>
+
+	Added an include of <algorithm> for an issue that shows up on gcc 4.4
+
+	M    FONgGrid.cc
+
+2013-01-31  James Gallagher <jgallagher@opendap.org>
+
+	Fixes for all and distcheck
+
+	M    FONgGrid.cc
+	M    tests/Makefile.am
+	M    FONgTransform.cc
+
+2013-01-22  James Gallagher <jgallagher@opendap.org>
+
+	Fixes for the JP2 code and its lone test. Still does not work on the
+	trunk although that may be an artifact of the gdal build in
+	dependencies...
+
+	D    .project
+	D    .cproject
+	M    tests/Makefile.am
+	M    JPEG2000Transmitter.cc
+	M    Makefile.am
+	M    JPEG2000Transmitter.h
+
+2013-01-21  James Gallagher <jgallagher@opendap.org>
+
+	Copied code started on the hyrax 1.8 release branch to the trunk for continued development.
+
+	A    https://scm.opendap.org/svn/trunk/fileout_gdal
+
+2012-12-31  James Gallagher <jgallagher@opendap.org>
+
+2012-12-31  James Gallagher <jgallagher@opendap.org>
+
+	paths
+
+2012-12-31  James Gallagher <jgallagher@opendap.org>
+
+	Removed/ignored some files.
+
+2012-12-31  James Gallagher <jgallagher@opendap.org>
+
+	make check now works. Split the tests o the jp2 tests are run only when
+	that feature is compiled into the code.
+
+	M    tests/Makefile.am
+	M    configure.ac
+	M    NEWS
+
+2012-12-31  James Gallagher <jgallagher@opendap.org>
+
+	Removed/ignored some files.
+
+2012-12-31  James Gallagher <jgallagher@opendap.org>
+
+	Split the tests into two parts, one for TIF and one for jp2.
+
+2012-12-21  James Gallagher <jgallagher@opendap.org>
+
+	Added the functions patch to the JPEG2000 output (already added to the GeoTIFF output).
+
+2012-12-21  James Gallagher <jgallagher@opendap.org>
+
+	Fixed the bug where server functions were not working for geotiff responses.
+
+2012-12-18  James Gallagher <jgallagher@opendap.org>
+
+	Made the error messages better.
+
+2012-12-17  James Gallagher <jgallagher@opendap.org>
+
+	Added test for GMLJP2
+
+2012-12-17  James Gallagher <jgallagher@opendap.org>
+
+	This version supports GMLJP2 files.
+
+2012-12-14  James Gallagher <jgallagher@opendap.org>
+
+	Added JPEG2000
+
+2012-12-14  James Gallagher <jgallagher@opendap.org>
+
+	Added support for multiband images
+
+2012-12-13  James Gallagher <jgallagher@opendap.org>
+
+	ChangeLog and README updated
+
+2012-12-13  James Gallagher <jgallagher@opendap.org>
+
+	Removed this extraneous file
+
+	D    svn-commit.tmp
+
+2012-12-13  James Gallagher <jgallagher@opendap.org>
+
+	Fixed a bug in the way the geotransform coefs were computed. Images now look correct and a simple sampling of values shows the lat/lon values are sensible.
+
 2012-12-13  James Gallagher <jgallagher@opendap.org>
 
 	Removed this extraneous file

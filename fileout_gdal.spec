@@ -1,6 +1,6 @@
 Summary: Return a GeoTiff, JP2k, etc., File for a DAP Data response
 Name: fileout_gdal
-Version: 0.9.1
+Version: 0.9.2
 Release: 1
 License: LGPLv2+
 Group: System Environment/Daemons
