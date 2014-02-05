@@ -24,6 +24,9 @@
 
 #include "config.h"
 
+#include <unistd.h>
+
+#include <cstdio>
 #include <cstdlib>
 
 #include <sys/types.h>                  // For umask
