@@ -8,12 +8,12 @@ URL: http://www.opendap.org/
 Source0: http://www.opendap.org/pub/source/%{name}-%{version}.tar.gz
 Requires:        libdap >= 3.11.0
 Requires:        bes >= 3.11.0
-Requires:        libgdal >= 1.8
+Requires:        gdal >= 1.10
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:   libdap-devel >= 3.11.0
 BuildRequires:   bes-devel >= 3.11.0
-BuildRequires:   libgdal-devel >= 1.10
+BuildRequires:   gdal-devel >= 1.10
 
 %description
 This is the fileout GDAL response handler for Hyrax - the OPeNDAP data
