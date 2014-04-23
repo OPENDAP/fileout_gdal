@@ -1,3 +1,37 @@
+2014-03-26  James Gallagher <jgallagher@opendap.org>
+
+	names libdap fixes for osx 10.9
+
+	M    FONgGrid.h
+
+2014-02-05  James Gallagher <jgallagher@opendap.org>
+
+	Changes for OSX 10.9
+
+2013-11-15  James Gallagher <jgallagher@opendap.org>
+
+	Updated the spec file dependency for gdal
+
+	M    fileout_gdal.spec
+
+2013-10-01  James Gallagher <jgallagher@opendap.org>
+
+	Updated the FSF address in the copyright headers
+
+2013-09-10  Nathan Potter <ndp@opendap.org>
+
+	fileout_gdal: Updated ChangeLog, NEWS, INSTALL, etc. for Hyrax 1.9
+
+2013-08-29  James Gallagher <jgallagher@opendap.org>
+
+	RPM fixes
+
+	M    fileout_gdal/fileout_gdal.spec
+	M    gdal_handler/gdal_handler.spec
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
 2013-08-29  James Gallagher <jgallagher@opendap.org>
 
 	RPM fixes
