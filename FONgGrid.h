@@ -28,8 +28,10 @@
 class FONgTransform;
 class FONgBaseType;
 
-class libdap::Grid;
-class libdap::Array;
+namespace libdap {
+    class Grid;
+    class Array;
+}
 
 /** @brief A DAP Grid with file out netcdf information included
  *

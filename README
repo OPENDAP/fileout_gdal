@@ -1,5 +1,5 @@
 
-Updated for version 0.9.2
+Updated for version 0.9.3
 
 This handler builds a GeoTiff, JPEG2000, and GMLJP2 responses from 
 a DAP data response, with some
