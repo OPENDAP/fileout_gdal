@@ -123,23 +123,16 @@ GeoTiffTransmitter::GeoTiffTransmitter() :  BESBasicTransmitter()
 void GeoTiffTransmitter::send_data_as_geotiff(BESResponseObject *obj, BESDataHandlerInterface &dhi)
 {
     BESDataDDSResponse *bdds = dynamic_cast<BESDataDDSResponse *>(obj);
-    if (!bdds) {
+    if (!bdds)
         throw BESInternalError("cast error", __FILE__, __LINE__);
-    }
 
     DataDDS *dds = bdds->get_dds();
-    if (!dds) {
-        string err = (string) "No DataDDS has been created for transmit";
-        BESInternalError pe(err, __FILE__, __LINE__);
-        throw pe;
-    }
+    if (!dds)
+        throw BESInternalError("No DataDDS has been created for transmit", __FILE__, __LINE__);
 
     ostream &strm = dhi.get_output_stream();
-    if (!strm) {
-        string err = (string) "Output stream is not set, cannot return as";
-        BESInternalError pe(err, __FILE__, __LINE__);
-        throw pe;
-    }
+    if (!strm)
+        throw BESInternalError("Output stream is not set, cannot return as", __FILE__, __LINE__);
 
     BESDEBUG("fong2", "GeoTiffTransmitter::send_data - parsing the constraint" << endl);
 
@@ -149,13 +142,10 @@ void GeoTiffTransmitter::send_data_as_geotiff(BESResponseObject *obj, BESDataHan
         bdds->get_ce().parse_constraint(ce, *dds);
     }
     catch (Error &e) {
-        string em = e.get_error_message();
-        string err = "Failed to parse the constraint expression: " + em;
-        throw BESInternalError(err, __FILE__, __LINE__);
+        throw BESInternalError("Failed to parse the constraint expression: " + e.get_error_message(), __FILE__, __LINE__);
     }
     catch (...) {
-        string err = (string) "Failed to parse the constraint expression: " + "Unknown exception caught";
-        throw BESInternalError(err, __FILE__, __LINE__);
+        throw BESInternalError("Failed to parse the constraint expression: Unknown exception caught", __FILE__, __LINE__);
     }
 
     // now we need to read the data
@@ -165,18 +155,14 @@ void GeoTiffTransmitter::send_data_as_geotiff(BESResponseObject *obj, BESDataHan
         // Handle *functional* constraint expressions specially
         if (bdds->get_ce().function_clauses()) {
             BESDEBUG("fonc", "processing a functional constraint clause(s)." << endl);
-            dds = bdds->get_ce().eval_function_clauses(*dds);
+            DataDDS *tmp_dds = bdds->get_ce().eval_function_clauses(*dds);
+            bdds->set_dds(tmp_dds);
+            delete dds;
+            dds = tmp_dds;
         }
-        else
-        {
+        else {
             // Iterate through the variables in the DataDDS and read
             // in the data if the variable has the send flag set.
-
-            // Note the special case for Sequence. The
-            // transfer_data() method uses the same logic as
-            // serialize() to read values but transfers them to the
-            // d_values field instead of writing them to a XDR sink
-            // pointer. jhrg 9/13/06
             for (DDS::Vars_iter i = dds->var_begin(); i != dds->var_end(); i++) {
                 if ((*i)->send_p()) {
                     (*i)->intern_data(bdds->get_ce(), *dds);

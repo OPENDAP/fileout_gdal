@@ -1,3 +1,25 @@
+2014-07-30  James Gallagher <jgallagher@opendap.org>
+
+	Fixed a memory leak in the *Transmitter.cc code (both GeoTiff and
+	JPEG200) that was discovered in the BESAsciiTransmit.cc file (see
+	ticket 2240).
+
+2014-04-28  James Gallagher <jgallagher@opendap.org>
+
+	Bumped up the version to match the versio in configure.ac
+
+	M    fileout_gdal.spec
+
+2014-04-23  Nathan Potter <ndp@coas.oregonstate.edu>
+
+	fileout_gdal: Checking software version update and associated release changes.
+
+2014-03-26  James Gallagher <jgallagher@opendap.org>
+
+	names libdap fixes for osx 10.9
+
+	M    FONgGrid.h
+
 2014-03-26  James Gallagher <jgallagher@opendap.org>
 
 	names libdap fixes for osx 10.9

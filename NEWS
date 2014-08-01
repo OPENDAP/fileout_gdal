@@ -1,3 +1,7 @@
+Version 0.9.4
+
+Memory leak fixes (ticket 2240)
+
 Version 0.9.3
 
 Production rules and other minor updates
