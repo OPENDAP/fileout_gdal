@@ -47,8 +47,9 @@ private:
     GDALDataset *d_dest;
 
     libdap::DDS *d_dds;
+#if 0
     libdap::ConstraintEvaluator &d_evaluator;
-
+#endif
     string d_localfile;
 
     vector<FONgBaseType *> d_fong_vars;
@@ -67,8 +68,10 @@ private:
 
     int d_num_bands;
 
+#if 0
     int d_size_x;
     int d_size_y;
+#endif
 
     void m_scale_data(double *data);
     bool effectively_two_D(FONgBaseType *fbtp);

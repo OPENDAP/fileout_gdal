@@ -75,8 +75,8 @@ void FONgModule::initialize(const string &modname)
 
     BESDEBUG( "fong", "    adding geotiff service to dap" << endl );
     BESServiceRegistry::TheRegistry()->add_format(OPENDAP_SERVICE, DATA_SERVICE, RETURNAS_GEOTIFF);
-#if JP2
 
+#if JP2
     BESDEBUG( "fong", "    adding jpeg2000 service to dap" << endl );
     BESServiceRegistry::TheRegistry()->add_format(OPENDAP_SERVICE, DATA_SERVICE, RETURNAS_JPEG2000);
 #endif
