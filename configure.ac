@@ -8,6 +8,8 @@ AC_CONFIG_MACRO_DIR([conf])
 
 AM_INIT_AUTOMAKE(1.10)
 
+AM_CONDITIONAL([DAP_MODULES], [false])
+
 # The handler is a shared object library, so we don't normally need
 # the static lib. Override this default by specifying `--enable-static',
 # which can make running unit tests with valgrind far more pleasant. 
@@ -140,7 +142,7 @@ AM_CONDITIONAL([BUILD_HYRAX_DEBUG], [test "x$build_hyrax_debug" = "xtrue"])
 
 AC_CONFIG_FILES([Makefile])
 
-AC_CONFIG_FILES([tests/Makefile tests/package.m4 tests/atlocal])
+AC_CONFIG_FILES([tests/Makefile tests/package.m4 tests/atlocal tests/bes.conf])
 AC_CONFIG_FILES([tests/generate_data_baseline.sh], [chmod +x tests/generate_data_baseline.sh])
 
 AC_CONFIG_TESTDIR(tests)

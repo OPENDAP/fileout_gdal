@@ -9,7 +9,8 @@ TESTSUITE_JP2 =
 endif
 
 EXTRA_DIST = $(TESTSUITE_TIF).at $(TESTSUITE_TIF) \
-    package.m4.in $(srcdir)/package.m4 atlocal.in bes.conf.in gdal
+package.m4.in $(srcdir)/package.m4 atlocal.in bes.conf.in \
+bes.conf.modules.in gdal
 
 if OPENJPEG_FOUND
 EXTRA_DIST += $(TESTSUITE_JP2).at $(TESTSUITE_JP2)
@@ -42,15 +43,3 @@ $(TESTSUITE_TIF): $(TESTSUITE_TIF).at $(srcdir)/package.m4 bes.conf
 $(TESTSUITE_JP2): $(TESTSUITE_JP2).at $(srcdir)/package.m4 bes.conf
 	$(AUTOTEST) -I '$(srcdir)' -o ${srcdir}/$@.tmp $@.at
 	mv ${srcdir}/$@.tmp ${srcdir}/$@
-
-bes.conf: bes.conf.in ../config.status
-	my_topdir=`echo ${abs_top_srcdir} | sed 's/\(.*\)\/\(.[^\/]*\)\/\.\./\1/g'`; \
-	sed -e "s%[@]pkgdatadir[@]%${pkgdatadir}%" \
-		-e "s%[@]sysconfdir[@]%${sysconfdir}%" \
-		-e "s%[@]beslibdir[@]%${BES_MODULE_DIR}%" \
-		-e "s%[@]datadir[@]%${datadir}%" \
-		-e "s%[@]abs_top_srcdir[@]%$${my_topdir}%" \
-		-e "s%[@]abs_top_builddir[@]%${abs_top_builddir}%" \
-		-e "s%[@]bindir[@]%${bindir}%" $< > bes.conf
-
-

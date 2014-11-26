@@ -4,20 +4,27 @@
 # 11/1/12 jhrg
 
 AUTOMAKE_OPTIONS = foreign check-news
-# DISABLE_STATIC
 
 ACLOCAL_AMFLAGS = -I conf
 
 SUBDIRS = . tests
-DIST_SUBDIRS = tests
+# DIST_SUBDIRS = tests
+
+if DAP_MODULES
+AM_CPPFLAGS = -I$(top_srcdir)/dispatch -I$(top_srcdir)/dap $(GDAL_CFLAGS) $(DAP_CFLAGS)
+LIBADD = $(GDAL_LDFLAGS) $(DAP_SERVER_LIBS) $(DAP_CLIENT_LIBS)
+else
+AM_CPPFLAGS = $(BES_CPPFLAGS) # or wahtever was set here or in ..._CPPFLAGS
+LIBADD = $(GDAL_LDFLAGS) $(BES_DAP_LIBS)      # and ..._LIBADD
+endif
 
 lib_besdir=$(libdir)/bes
 lib_bes_LTLIBRARIES = libfong_module.la
 
 libfong_module_la_SOURCES = $(FONG_SRC) $(FONG_HDR)
-libfong_module_la_CPPFLAGS = $(BES_CPPFLAGS) $(GDAL_CFLAGS)
+# libfong_module_la_CPPFLAGS = $(BES_CPPFLAGS) $(GDAL_CFLAGS)
 libfong_module_la_LDFLAGS = -avoid-version -module 
-libfong_module_la_LIBADD = $(BES_DAP_LIBS) $(GDAL_LDFLAGS)
+libfong_module_la_LIBADD = $(LIBADD)
 
 FONG_SRC = GeoTiffTransmitter.cc JPEG2000Transmitter.cc FONgRequestHandler.cc	\
 	FONgModule.cc FONgTransform.cc FONgBaseType.cc FONgGrid.cc
@@ -39,7 +46,7 @@ install-data-local: fong.conf
 uninstall-local:
 	rm -f $(DESTDIR)$(sysconfdir)/bes/modules/fong.conf
 
-fong.conf: fong.conf.in config.status
+fong.conf: fong.conf.in $(top_srcdir)/config.status
 	sed -e "s%[@]bes_modules_dir[@]%${lib_besdir}%" $< > fong.conf
 
 # Not nearly as clean as it could be, but this removes .svn directories
