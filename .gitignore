@@ -51,3 +51,4 @@ tests/bes.conf
 tests/generate_data_baseline.sh
 tests/package.m4
 tests/testsuite_tif
+tests/testsuite_jp2
