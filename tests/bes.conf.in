@@ -7,11 +7,10 @@ BES.LogName=./bes.log
 BES.LogVerbose=no
 
 BES.modules=dap,cmd,nc,fong
-BES.module.dap=@beslibdir@/libdap_module.so
-BES.module.cmd=@beslibdir@/libdap_xml_module.so
+BES.module.dap=@modulesdir@/libdap_module.so
+BES.module.cmd=@modulesdir@/libdap_xml_module.so
 
-BES.module.nc=@beslibdir@/libnc_module.so
-# BES.module.h4=@beslibdir@/libhdf4_module.so
+BES.module.nc=@modulesdir@/libnc_module.so
 
 BES.module.fong=@abs_top_builddir@/.libs/libfong_module.so
 
