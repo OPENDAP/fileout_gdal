@@ -31,6 +31,20 @@ distclean-local:
 	-rm atconfig
 	-rm bes.conf
 
+if DAP_MODULES
+BES_CONF_IN = bes.conf.modules.in
+else
+BES_CONF_IN = bes.conf.in
+endif
+
+# Build the bes.conf used for testing so that the value substituted for
+# @abs_top_srcdir@ does not contain '../'. This happens when using 
+# configure's value for the parameter when running the distcheck target.
+bes.conf: $(BES_CONF_IN) $(top_srcdir)/configure.ac
+	@clean_abs_top_srcdir=`echo ${abs_top_srcdir} | sed 's/\(.*\)\/\(.[^\/]*\)\/\.\./\1/g'`; \
+	sed -e "s%[@]abs_top_srcdir[@]%$$clean_abs_top_srcdir%" \
+		-e "s%[@]abs_top_builddir[@]%${abs_top_builddir}%" $< > bes.conf
+
 
 # Use the missing script for better error checking on autom4te run.
 AUTOM4TE = $(SHELL) $(top_srcdir)/conf/missing --run autom4te
@@ -43,3 +57,15 @@ $(TESTSUITE_TIF): $(TESTSUITE_TIF).at $(srcdir)/package.m4 bes.conf
 $(TESTSUITE_JP2): $(TESTSUITE_JP2).at $(srcdir)/package.m4 bes.conf
 	$(AUTOTEST) -I '$(srcdir)' -o ${srcdir}/$@.tmp $@.at
 	mv ${srcdir}/$@.tmp ${srcdir}/$@
+	
+# The `:;' works around a Bash 3.2 bug when the output is not writeable.
+$(srcdir)/package.m4: $(top_srcdir)/configure.ac
+	:;{ \
+	echo '# Signature of the current package.' && \
+	echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])' && \
+	echo 'm4_define([AT_PACKAGE_TARNAME],   [@PACKAGE_TARNAME@])' && \
+	echo 'm4_define([AT_PACKAGE_VERSION],   [@PACKAGE_VERSION@])' && \
+	echo 'm4_define([AT_PACKAGE_STRING],    [@PACKAGE_STRING@])' && \
+	echo 'm4_define([AT_PACKAGE_BUGREPORT], [@PACKAGE_BUGREPORT@])'; \
+	} >'$(srcdir)/package.m4'
+
