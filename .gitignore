@@ -44,6 +44,7 @@ aclocal.m4
 libtool
 atconfig
 atlocal
+fong.conf
 
 ## fileout_gdal specific files
 
