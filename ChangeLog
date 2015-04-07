@@ -1,3 +1,47 @@
+2015-03-31  James Gallagher  <jgallagher@opendap.org>
+
+	Added to git ignore
+
+2015-03-19  James Gallagher  <jgallagher@opendap.org>
+
+	Modified Makefile.am for distcheck combined with the modules build of the BES
+
+2015-01-16  James Gallagher  <jgallagher@opendap.org>
+
+	Removed dist-hook which as a hack for SVN
+
+2014-12-12  James Gallagher  <jgallagher@opendap.org>
+
+	Fixed tests after module branch merge
+
+2014-12-07  James Gallagher  <jgallagher@opendap.org>
+
+	Added module name and version info to Makefile.am
+	This change was made to support the modules build where the autoconf
+	symbols PACKAGE_NAME and _MODULE are defined by the bes configure
+	script. This meant that the version response from the bes was useless
+	since it listed every module as 'bes' and gave the bes' version
+	number.
+
+2014-11-26  James Gallagher  <jgallagher@opendap.org>
+
+	Added jp2 testsuite to gitignore
+
+	Added support for the BES modules build.
+
+2014-09-16  James Gallagher  <jgallagher@opendap.org>
+
+	Removed the old OPENDAP_DEBUG_OPTIONS macro from many configure.ac files. Subclasses for/of Sequence were not defining the length() virtual method correctly - adding 'const' quieted the warning. Fileout GDAL had an unneeded param (ConstraintEvaluator).
+
+2014-08-01  James Gallagher  <jgallagher@opendap.org>
+
+	Release 0.9.4 checklist
+	M    ChangeLog
+	M    INSTALL
+	M    NEWS
+	M    README
+	M    configure.ac
+	M    fileout_gdal.spec
 2014-07-30  James Gallagher <jgallagher@opendap.org>
 
 	Fixed a memory leak in the *Transmitter.cc code (both GeoTiff and
