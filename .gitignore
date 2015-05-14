@@ -53,3 +53,5 @@ tests/generate_data_baseline.sh
 tests/package.m4
 tests/testsuite_tif
 tests/testsuite_jp2
+tests/testsuite_tif.dir
+tests/testsuite_jp2.dir
