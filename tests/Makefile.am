@@ -26,6 +26,7 @@ check-local: atconfig atlocal $(TESTSUITE_TIF) $(TESTSUITE_JP2)
 clean-local:
 	test ! -f '$(TESTSUITE_TIF)' || $(SHELL) '$(TESTSUITE_TIF)' --clean
 	test ! -f '$(TESTSUITE_JP2)' || $(SHELL) '$(TESTSUITE_JP2)' --clean
+	-rm $(srcdir)/package.m4
 
 distclean-local:
 	-rm atconfig
@@ -50,7 +51,7 @@ bes.conf: $(BES_CONF_IN) $(top_srcdir)/configure.ac
 AUTOM4TE = $(SHELL) $(top_srcdir)/conf/missing --run autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 
-$(TESTSUITE_TIF): $(TESTSUITE_TIF).at $(srcdir)/package.m4 bes.conf
+$(TESTSUITE_TIF): $(srcdir)/package.m4 $(TESTSUITE_TIF).at bes.conf
 	$(AUTOTEST) -I '$(srcdir)' -o ${srcdir}/$@.tmp $@.at
 	mv ${srcdir}/$@.tmp ${srcdir}/$@
 
