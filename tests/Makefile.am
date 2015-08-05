@@ -9,7 +9,7 @@ TESTSUITE_JP2 =
 endif
 
 EXTRA_DIST = $(TESTSUITE_TIF).at $(TESTSUITE_TIF) \
-package.m4.in $(srcdir)/package.m4 atlocal.in bes.conf.in \
+$(srcdir)/package.m4 atlocal.in bes.conf.in \
 bes.conf.modules.in gdal
 
 if OPENJPEG_FOUND
