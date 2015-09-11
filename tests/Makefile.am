@@ -17,7 +17,13 @@ EXTRA_DIST += $(TESTSUITE_JP2).at $(TESTSUITE_JP2)
 endif
 
 noinst_DATA = bes.conf
-DISTCLEANFILES = bes.conf
+
+CLEANFILES = $(TESTSUITE_TIF) $(srcdir)/package.m4
+if OPENJPEG_FOUND
+CLEANFILES += $(TESTSUITE_JP2)
+endif
+
+DISTCLEANFILES = bes.conf atconfig
 
 check-local: atconfig atlocal $(TESTSUITE_TIF) $(TESTSUITE_JP2)
 	$(SHELL) '$(TESTSUITE_TIF)' $(TESTSUITE_TIFFLAGS)
@@ -26,11 +32,6 @@ check-local: atconfig atlocal $(TESTSUITE_TIF) $(TESTSUITE_JP2)
 clean-local:
 	test ! -f '$(TESTSUITE_TIF)' || $(SHELL) '$(TESTSUITE_TIF)' --clean
 	test ! -f '$(TESTSUITE_JP2)' || $(SHELL) '$(TESTSUITE_JP2)' --clean
-	-rm $(srcdir)/package.m4
-
-distclean-local:
-	-rm atconfig
-	-rm bes.conf
 
 if DAP_MODULES
 BES_CONF_IN = bes.conf.modules.in
@@ -58,7 +59,7 @@ $(TESTSUITE_TIF): $(srcdir)/package.m4 $(TESTSUITE_TIF).at bes.conf
 $(TESTSUITE_JP2): $(TESTSUITE_JP2).at $(srcdir)/package.m4 bes.conf
 	$(AUTOTEST) -I '$(srcdir)' -o ${srcdir}/$@.tmp $@.at
 	mv ${srcdir}/$@.tmp ${srcdir}/$@
-	
+
 # The `:;' works around a Bash 3.2 bug when the output is not writeable.
 $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	:;{ \
