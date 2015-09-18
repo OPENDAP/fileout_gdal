@@ -1,3 +1,30 @@
+2015-09-11  James Gallagher  <jgallagher@opendap.org>
+
+	Modified Makefile.am to support distcheck
+
+2015-08-05  James Gallagher  <jgallagher@opendap.org>
+
+	Merge branch 'master' of https://github.com/opendap/fileout_gdal
+
+	Changes for package.m4
+
+2015-08-04  James Gallagher  <jgallagher@opendap.org>
+
+	Fixed package.m4 in the autoconf dirs Makefile.am files
+
+2015-05-14  James Gallagher  <jgallagher@opendap.org>
+
+	Added to gitignore
+
+2015-04-09  James Gallagher  <jgallagher@opendap.org>
+
+	Merge branch 'master' of https://github.com/opendap/fileout_gdal
+
+	Modified Makefile.am to support bes distcheck
+
+2015-04-06  James Gallagher  <jgallagher@opendap.org>
+
+	Version 0.9.5
 2015-03-31  James Gallagher  <jgallagher@opendap.org>
 
 	Added to git ignore
