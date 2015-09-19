@@ -22,7 +22,7 @@ AM_CPPFLAGS = $(BES_CPPFLAGS) $(GDAL_CFLAGS)
 LIBADD = $(GDAL_LDFLAGS) $(BES_DAP_LIBS)
 endif
 
-AM_CPPFLAGS += -DMODULE_NAME=\"$(M_NAME)\" -DMODULE_VERSION=\"$(M_VER=0.9.6
+AM_CPPFLAGS += -DMODULE_NAME=\"$(M_NAME)\" -DMODULE_VERSION=\"$(M_VER)\"
 
 lib_besdir=$(libdir)/bes
 lib_bes_LTLIBRARIES = libfong_module.la
