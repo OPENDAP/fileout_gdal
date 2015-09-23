@@ -18,12 +18,9 @@ endif
 
 noinst_DATA = bes.conf
 
-CLEANFILES = $(TESTSUITE_TIF) $(srcdir)/package.m4
-if OPENJPEG_FOUND
-CLEANFILES += $(TESTSUITE_JP2)
-endif
+CLEANFILES = bes.conf
 
-DISTCLEANFILES = bes.conf atconfig
+DISTCLEANFILES = atconfig
 
 check-local: atconfig atlocal $(TESTSUITE_TIF) $(TESTSUITE_JP2)
 	$(SHELL) '$(TESTSUITE_TIF)' $(TESTSUITE_TIFFLAGS)
@@ -32,6 +29,7 @@ check-local: atconfig atlocal $(TESTSUITE_TIF) $(TESTSUITE_JP2)
 clean-local:
 	test ! -f '$(TESTSUITE_TIF)' || $(SHELL) '$(TESTSUITE_TIF)' --clean
 	test ! -f '$(TESTSUITE_JP2)' || $(SHELL) '$(TESTSUITE_JP2)' --clean
+	-rm -f $(TESTSUITE_TIF) $(TESTSUITE_JP2) $(srcdir)/package.m4 
 
 if DAP_MODULES
 BES_CONF_IN = bes.conf.modules.in
