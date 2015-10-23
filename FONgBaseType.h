@@ -25,6 +25,8 @@
 #ifndef FONgBaseType_h_
 #define FONgBaseType_h_ 1
 
+#include <Type.h>
+
 class BESObj;
 class FONgTransform;
 class GDALDataset;
@@ -41,7 +43,7 @@ protected:
     libdap::Type d_type;
 
 public:
-    FONgBaseType() {}
+    FONgBaseType(): d_name(""), d_type(libdap::dods_null_c) {}
 
     virtual ~FONgBaseType() {}
 

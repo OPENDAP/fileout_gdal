@@ -60,8 +60,9 @@ using namespace libdap;
  * @throws BESInternalError
  */
 FONgTransform::FONgTransform(DDS *dds, ConstraintEvaluator &/*evaluator*/, const string &localfile) :
-        d_dds(dds), /*d_evaluator(evaluator),*/ d_localfile(localfile),
-        d_geo_transform_set(false), d_no_data_type(none), d_num_bands(0)
+    d_dest(0), d_dds(dds), d_localfile(localfile),
+    d_geo_transform_set(false), d_width(0.0), d_height(0.0), d_top(0.0), d_left(0.0),
+    d_bottom(0.0), d_right(0.0), d_no_data(0.0), d_no_data_type(none), d_num_bands(0)
 {
     if (localfile.empty())
         throw BESInternalError("Empty local file name passed to constructor", __FILE__, __LINE__);
