@@ -45,6 +45,7 @@ using namespace libdap;
 #include "FONgTransform.h"
 
 #include <BESInternalError.h>
+#include <BESDapError.h>
 #include <BESContextManager.h>
 #include <BESDataDDSResponse.h>
 #include <BESDapNames.h>
@@ -142,7 +143,7 @@ void GeoTiffTransmitter::send_data_as_geotiff(BESResponseObject *obj, BESDataHan
         bdds->get_ce().parse_constraint(ce, *dds);
     }
     catch (Error &e) {
-        throw BESInternalError("Failed to parse the constraint expression: " + e.get_error_message(), __FILE__, __LINE__);
+        throw BESDapError("Failed to parse the constraint expression: " + e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
     }
     catch (...) {
         throw BESInternalError("Failed to parse the constraint expression: Unknown exception caught", __FILE__, __LINE__);
@@ -171,7 +172,10 @@ void GeoTiffTransmitter::send_data_as_geotiff(BESResponseObject *obj, BESDataHan
         }
     }
     catch (Error &e) {
-        throw BESInternalError("Failed to read data: " + e.get_error_message(), __FILE__, __LINE__);
+        throw BESDapError("Failed to read data: " + e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
+    }
+    catch (BESError &e) {
+        throw;
     }
     catch (...) {
         throw BESInternalError("Failed to read data: Unknown exception caught", __FILE__, __LINE__);
@@ -208,17 +212,16 @@ void GeoTiffTransmitter::send_data_as_geotiff(BESResponseObject *obj, BESDataHan
 
         GeoTiffTransmitter::return_temp_stream(&temp_file[0], strm);
     }
+    catch (Error &e) {
+        close(fd);
+        (void) unlink(&temp_file[0]);
+        throw BESDapError("Failed to transform data to GeoTiff: " + e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);
+    }
     catch (BESError &e) {
         close(fd);
         (void) unlink(&temp_file[0]);
         throw;
     }
-    catch (Error &e) {
-        close(fd);
-        (void) unlink(&temp_file[0]);
-        throw BESInternalError(e.get_error_message(), __FILE__, __LINE__);
-    }
-
     catch (...) {
         close(fd);
         (void) unlink(&temp_file[0]);
