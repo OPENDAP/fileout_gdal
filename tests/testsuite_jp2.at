@@ -41,3 +41,5 @@ AT_CLEANUP]
 ])
 
 AT_BESCMD_BINARYDATA_RESPONSE_TEST([gdal/coads_climatology.nc.2.bescmd], [jp2], [pass])
+
+AT_BESCMD_BINARYDATA_RESPONSE_TEST([gdal/function_result_unwrap_jp2.bescmd], [jp2], [pass])

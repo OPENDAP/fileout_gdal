@@ -51,6 +51,7 @@ using namespace libdap;
 #include <BESDapNames.h>
 #include <BESDataNames.h>
 #include <BESDebug.h>
+#include <DapFunctionUtils.h>
 
 #include <TheBESKeys.h>
 
@@ -175,13 +176,26 @@ void JPEG2000Transmitter::send_data_as_jp2(BESResponseObject *obj, BESDataHandle
     BESDEBUG("JPEG20002", "JPEG2000Transmitter::send_data - transforming into temporary file " << &temp_file[0] << endl);
 
     try {
+
         // Handle *functional* constraint expressions specially
         if (bdds->get_ce().function_clauses()) {
-            BESDEBUG("fonc", "processing a functional constraint clause(s)." << endl);
+            BESDEBUG("fong2", "processing a functional constraint clause(s)." << endl);
             DataDDS *tmp_dds = bdds->get_ce().eval_function_clauses(*dds);
-            bdds->set_dds(tmp_dds);
             delete dds;
             dds = tmp_dds;
+            bdds->set_dds(dds);
+
+            // This next step utilizes a well known function, promote_function_output_structures()
+            // to look for one or more top level Structures whose name indicates (by way of ending
+            // with "_uwrap") that their contents should be promoted (aka moved) to the top level.
+            // This is in support of a hack around the current API where server side functions
+            // may only return a single DAP object and not a collection of objects. The name suffix
+            // "_unwrap" is used as a signal from the function to the the various response
+            // builders and transmitters that the representation needs to be altered before
+            // transmission, and that in fact is what happens in our friend
+            // promote_function_output_structures()
+            promote_function_output_structures(dds);
+
         }
         else {
             // Iterate through the variables in the DataDDS and read
@@ -192,6 +206,7 @@ void JPEG2000Transmitter::send_data_as_jp2(BESResponseObject *obj, BESDataHandle
                 }
             }
         }
+
     }
     catch (Error &e) {
         throw BESDapError("Failed to read data: " + e.get_error_message(), false, e.get_error_code(), __FILE__, __LINE__);

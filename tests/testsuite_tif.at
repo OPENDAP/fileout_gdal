@@ -42,7 +42,9 @@ AT_CLEANUP]
 
 AT_BESCMD_BINARYDATA_RESPONSE_TEST([gdal/coads_climatology.nc.0.bescmd], [tif], [pass])
 AT_BESCMD_BINARYDATA_RESPONSE_TEST([gdal/coads_climatology.nc.1.bescmd], [tif], [pass])
-# AT_BESCMD_BINARYDATA_RESPONSE_TEST([gdal/coads_climatology.nc.2.bescmd], [jp2], [pass])
 
 # No baselines for the error tests.
 AT_BESCMD_ERROR_RESPONSE_TEST([gdal/coads_climatology.nc.1.err.bescmd], [pass])
+
+# Function result unwrap test
+AT_BESCMD_BINARYDATA_RESPONSE_TEST([gdal/function_result_unwrap_tif.bescmd], [tif], [pass])
