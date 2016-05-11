@@ -129,7 +129,7 @@ void JPEG2000Transmitter::send_data_as_jp2(BESResponseObject *obj, BESDataHandle
         throw BESInternalError("cast error", __FILE__, __LINE__);
     }
 
-    DataDDS *dds = bdds->get_dds();
+    DDS *dds = bdds->get_dds();
     if (!dds)
         throw BESInternalError("No DataDDS has been created for transmit", __FILE__, __LINE__);
 
@@ -180,7 +180,7 @@ void JPEG2000Transmitter::send_data_as_jp2(BESResponseObject *obj, BESDataHandle
         // Handle *functional* constraint expressions specially
         if (bdds->get_ce().function_clauses()) {
             BESDEBUG("fong2", "processing a functional constraint clause(s)." << endl);
-            DataDDS *tmp_dds = bdds->get_ce().eval_function_clauses(*dds);
+            DDS *tmp_dds = bdds->get_ce().eval_function_clauses(*dds);
             delete dds;
             dds = tmp_dds;
             bdds->set_dds(dds);
