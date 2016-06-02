@@ -10,7 +10,7 @@ endif
 
 EXTRA_DIST = $(TESTSUITE_TIF).at $(TESTSUITE_TIF) \
 $(srcdir)/package.m4 atlocal.in bes.conf.in \
-bes.conf.modules.in gdal
+handler_tests_macros.m4 bes.conf.modules.in gdal
 
 if OPENJPEG_FOUND
 EXTRA_DIST += $(TESTSUITE_JP2).at $(TESTSUITE_JP2)
@@ -50,7 +50,7 @@ bes.conf: $(BES_CONF_IN) $(top_srcdir)/configure.ac
 AUTOM4TE = $(SHELL) $(top_srcdir)/conf/missing --run autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 
-$(TESTSUITE_TIF): $(srcdir)/package.m4 $(TESTSUITE_TIF).at bes.conf
+$(TESTSUITE_TIF): $(srcdir)/package.m4  $(srcdir)/handler_tests_macros.m4 $(TESTSUITE_TIF).at bes.conf
 	$(AUTOTEST) -I '$(srcdir)' -o ${srcdir}/$@.tmp $@.at
 	mv ${srcdir}/$@.tmp ${srcdir}/$@
 
