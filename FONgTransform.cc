@@ -426,11 +426,6 @@ void FONgTransform::transform_to_jpeg2000()
         if (!effectively_two_D(var(i)))
             throw Error("GeoTiff responses can consist of two-dimensional variables only; use constraints to reduce the size of Grids as needed.");
 
-#if 0
-    GDALAllRegister();
-    CPLSetErrorHandler(CPLQuietErrorHandler);
-#endif
-
     GDALDriver *Driver = GetGDALDriverManager()->GetDriverByName("MEM");
     if( Driver == NULL )
         throw Error("Could not get the MEM driver from/for GDAL: " + string(CPLGetLastErrorMsg()));
