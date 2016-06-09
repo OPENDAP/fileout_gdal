@@ -22,14 +22,17 @@
 // You can contact University Corporation for Atmospheric Research at
 // 3080 Center Green Drive, Boulder, CO 80301
 
-#include "FONgRequestHandler.h"
+#include <gdal.h>
+
 #include <BESResponseHandler.h>
 #include <BESResponseNames.h>
 #include <BESVersionInfo.h>
-#include <BESDataNames.h>
-#include <BESDataNames.h>
+
 #include <TheBESKeys.h>
+
 #include "config.h"
+
+#include "FONgRequestHandler.h"
 
 /** @brief Constructor for FileOut GDAL module
  *
@@ -44,6 +47,9 @@ FONgRequestHandler::FONgRequestHandler(const string &name) :
 {
     add_handler(HELP_RESPONSE, FONgRequestHandler::build_help);
     add_handler(VERS_RESPONSE, FONgRequestHandler::build_version);
+
+    GDALAllRegister();
+    CPLSetErrorHandler(CPLQuietErrorHandler);
 }
 
 /** @brief Any cleanup that needs to take place
@@ -80,10 +86,7 @@ bool FONgRequestHandler::build_help(BESDataHandlerInterface &dhi)
     map<string, string> attrs;
     attrs["name"] = MODULE_NAME ;
     attrs["version"] = MODULE_VERSION ;
-#if 0
-    attrs["name"] = PACKAGE_NAME;
-    attrs["version"] = PACKAGE_VERSION;
-#endif
+
     attrs["reference"] = ref;
     info->begin_tag("module", &attrs);
     info->end_tag("module");
@@ -105,9 +108,6 @@ bool FONgRequestHandler::build_version(BESDataHandlerInterface &dhi)
     if (!info)
         throw BESInternalError("cast error", __FILE__, __LINE__);
 
-#if 0
-    info->add_module(PACKAGE_NAME, PACKAGE_VERSION);
-#endif
     info->add_module(MODULE_NAME, MODULE_VERSION);
 
     return true;
