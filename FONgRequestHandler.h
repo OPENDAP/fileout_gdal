@@ -34,16 +34,15 @@
  * used to build a Dap DataDDS object, so those functions are not needed
  * here.
  */
-class FONgRequestHandler : public BESRequestHandler
-{
+class FONgRequestHandler: public BESRequestHandler {
 public:
-			FONgRequestHandler( const string &name ) ;
-    virtual		~FONgRequestHandler( void ) ;
+    FONgRequestHandler(const string &name);
+    virtual ~FONgRequestHandler(void);
 
-    virtual void	dump( ostream &strm ) const ;
+    virtual void dump(ostream &strm) const;
 
-    static bool		build_help( BESDataHandlerInterface &dhi ) ;
-    static bool		build_version( BESDataHandlerInterface &dhi ) ;
+    static bool build_help(BESDataHandlerInterface &dhi);
+    static bool build_version(BESDataHandlerInterface &dhi);
 };
 
 #endif

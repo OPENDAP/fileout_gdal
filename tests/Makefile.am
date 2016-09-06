@@ -2,19 +2,19 @@ AUTOMAKE_OPTIONS = foreign
 
 TESTSUITE_TIF = $(srcdir)/testsuite_tif
 
-if OPENJPEG_FOUND
-TESTSUITE_JP2 = $(srcdir)/testsuite_jp2
-else
+# if OPENJPEG_FOUND
+# TESTSUITE_JP2 = $(srcdir)/testsuite_jp2
+# else
 TESTSUITE_JP2 = 
-endif
+# endif
 
 EXTRA_DIST = $(TESTSUITE_TIF).at $(TESTSUITE_TIF) \
 $(srcdir)/package.m4 atlocal.in bes.conf.in \
-bes.conf.modules.in gdal
+handler_tests_macros.m4 bes.conf.modules.in gdal
 
-if OPENJPEG_FOUND
-EXTRA_DIST += $(TESTSUITE_JP2).at $(TESTSUITE_JP2)
-endif
+# if OPENJPEG_FOUND
+# EXTRA_DIST += $(TESTSUITE_JP2).at $(TESTSUITE_JP2)
+# endif
 
 noinst_DATA = bes.conf
 
@@ -50,11 +50,11 @@ bes.conf: $(BES_CONF_IN) $(top_srcdir)/configure.ac
 AUTOM4TE = $(SHELL) $(top_srcdir)/conf/missing --run autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 
-$(TESTSUITE_TIF): $(srcdir)/package.m4 $(TESTSUITE_TIF).at bes.conf
+$(TESTSUITE_TIF): $(TESTSUITE_TIF).at bes.conf $(srcdir)/package.m4 $(srcdir)/handler_tests_macros.m4 
 	$(AUTOTEST) -I '$(srcdir)' -o ${srcdir}/$@.tmp $@.at
 	mv ${srcdir}/$@.tmp ${srcdir}/$@
 
-$(TESTSUITE_JP2): $(TESTSUITE_JP2).at $(srcdir)/package.m4 bes.conf
+$(TESTSUITE_JP2): $(TESTSUITE_JP2).at bes.conf $(srcdir)/package.m4 $(srcdir)/handler_tests_macros.m4
 	$(AUTOTEST) -I '$(srcdir)' -o ${srcdir}/$@.tmp $@.at
 	mv ${srcdir}/$@.tmp ${srcdir}/$@
 

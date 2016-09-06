@@ -35,7 +35,6 @@
 #include <Structure.h>
 #include <Array.h>
 #include <Grid.h>
-//#include <ce_functions.h>
 #include <util.h>
 
 #include <BESDebug.h>
@@ -217,7 +216,7 @@ double *FONgTransform::geo_transform()
 
 /** @brief Is this effectively a two-dimensional variable?
  *
- * Look at teh Grid's Array and see if it is either a 2D array
+ * Look at the Grid's Array and see if it is either a 2D array
  * or if it has been subset so that all but two dimensions are
  * removed. Assume that users know what they are doing.
  *
@@ -319,8 +318,10 @@ void FONgTransform::transform_to_geotiff()
         if (!effectively_two_D(var(i)))
             throw Error("GeoTiff responses can consist of two-dimensional variables only; use constraints to reduce the size of Grids as needed.");
 
+#if 0
     GDALAllRegister();
     CPLSetErrorHandler(CPLQuietErrorHandler);
+#endif
 
     GDALDriver *Driver = GetGDALDriverManager()->GetDriverByName("GTiff");
     if( Driver == NULL )
@@ -424,9 +425,6 @@ void FONgTransform::transform_to_jpeg2000()
     for (int i = 0; i < num_bands(); ++i)
         if (!effectively_two_D(var(i)))
             throw Error("GeoTiff responses can consist of two-dimensional variables only; use constraints to reduce the size of Grids as needed.");
-
-    GDALAllRegister();
-    CPLSetErrorHandler(CPLQuietErrorHandler);
 
     GDALDriver *Driver = GetGDALDriverManager()->GetDriverByName("MEM");
     if( Driver == NULL )
@@ -532,5 +530,4 @@ void FONgTransform::transform_to_jpeg2000()
 
     GDALClose(d_dest);
     GDALClose(jpeg_dst);
-
 }

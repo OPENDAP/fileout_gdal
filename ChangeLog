@@ -1,6 +1,37 @@
+2016-04-13  Nathan Potter  <ndp@opendap.org>
+
+	Add tests/generate_data_baseline.sh.in file to satisfy some up stream autoconf deal in the bes.
+
+2016-04-05  James Gallagher  <jgallagher@opendap.org>
+
+	Added baselines for jpeg2000 reponses
+	These were made using gdal 1.10, not 2.0.2
+
+	Merge branch 'master' of https://github.com/opendap/fileout_gdal
+
+	Trying to repair the damage to the fo gdal tests...
+
+	Updated tests for gdal 2.0.2
+	Added handler_tests_macros and updated baselines for jp2 responses.
+
+2016-03-22  Nathan Potter  <ndp@opendap.org>
+
+	Added tests for tif and jp2 output using the function result unwrap scheme.
+
+2016-03-21  Nathan Potter  <ndp@opendap.org>
+
+	Tests for function result promotion in transmitters. Test function wrapitup() added.
+
+2016-01-26  James Gallagher  <jgallagher@opendap.org>
+
+	Updated ChangeLog, etc., for the bes 3.17 release
+
 2015-12-28  Nathan Potter  <ndp@opendap.org>
 
-	Patched error handling problems in Transmitter implmentations. In particular: 1) Ensured that libdap::Error objects are converted to BESDapError objects when caught. and 2) Catch and rethrow BESError objects whenever they could be thrown so they don't get swept up as unidentified errors in a catch(...) clause.
+	Patched error handling problems in Transmitter implmentations. In particular: 
+	1) Ensured that libdap::Error objects are converted to BESDapError objects 
+	when caught. and 2) Catch and rethrow BESError objects whenever they could 
+	be thrown so they don't get swept up as unidentified errors in a catch(...) clause.
 
 2015-10-27  James Gallagher  <jgallagher@opendap.org>
 

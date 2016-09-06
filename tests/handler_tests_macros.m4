@@ -71,12 +71,13 @@ m4_define([_AT_BESCMD_ERROR_TEST], [dnl
 
     AS_IF([test -n "$baselines" -a x$baselines = xyes],
         [
-        AT_CHECK([besstandalone -c $abs_builddir/bes.conf -i $input], [ignore], [stdout], [ignore])
+        AT_CHECK([besstandalone -c $abs_builddir/bes.conf -i $input], [0], [stdout], [ignore])
         AT_CHECK([mv stdout $baseline.tmp])
+        dnl hack baseline to contain only Message: ...?
         ],
         [
-        AT_CHECK([besstandalone -c $abs_builddir/bes.conf -i $input], [ignore], [stdout], [ignore])
-        AT_CHECK([diff -b -B $baseline stdout])
+        AT_CHECK([besstandalone -c $abs_builddir/bes.conf -i $input], [0], [stdout], [ignore])
+        AT_CHECK([fgrep -f $baseline stdout], [0], [ignore], [ignore])
         AT_XFAIL_IF([test "$3" = "xfail"])
         ])
 

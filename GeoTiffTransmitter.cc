@@ -271,9 +271,10 @@ void GeoTiffTransmitter::return_temp_stream(const string &filename, ostream &str
         throw BESInternalError("Internal server error, got zero count on stream buffer.", __FILE__, __LINE__);
     }
 
+    // I think this is never used - we never run Hyrax where the BES is accessed
+    // directly by HTTP.
     bool found = false;
-    string context = "transmit_protocol";
-    string protocol = BESContextManager::TheManager()->get_context(context, found);
+    string protocol = BESContextManager::TheManager()->get_context("transmit_protocol", found);
     if (protocol == "HTTP") {
         strm << "HTTP/1.0 200 OK\n";
         strm << "Content-type: application/octet-stream\n";
@@ -281,6 +282,7 @@ void GeoTiffTransmitter::return_temp_stream(const string &filename, ostream &str
         strm << "Content-Disposition: filename=" << filename << ".tif;\n\n";
         strm << flush;
     }
+
     strm.write(block, nbytes);
 
     while (os) {
