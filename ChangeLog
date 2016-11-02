@@ -1,3 +1,35 @@
+2016-09-06  James Gallagher  <jgallagher@opendap.org>
+
+	Merge branch 'master' into response_cache
+
+2016-09-01  James Gallagher  <jgallagher@opendap.org>
+
+	Removed the build of the JPEG2000 file response for now.
+	See ticket https://opendap.atlassian.net/browse/HYRAX-248
+
+2016-06-09  James Gallagher  <jgallagher@opendap.org>
+
+	Removed code that was commented out
+
+	Moved GDALAllRegister() into the RequestHandler ctor
+
+2016-06-02  James Gallagher  <jgallagher@opendap.org>
+
+	Fix for tests that intentionally trigger errors
+	The file name info breaks with distcheck since the file name
+	path is different.
+
+2016-06-01  James Gallagher  <jgallagher@opendap.org>
+
+	Hyrax 1.13.1
+
+2016-05-11  Nathan Potter  <ndp@opendap.org>
+
+	Dropped use of DataDDS in fvor of the DDS class.
+
+2016-04-13  Nathan Potter  <ndp@opendap.org>
+
+	Add tests/generate_data_baseline.sh.in file to satisfy some up stream autoconf deal in the bes.
 2016-04-13  Nathan Potter  <ndp@opendap.org>
 
 	Add tests/generate_data_baseline.sh.in file to satisfy some up stream autoconf deal in the bes.
